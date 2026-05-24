@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tenant {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  clerkOrgId       String   @unique
+  plan             Plan     @default(FREE)
+  stripeCustomerId String?
+  createdAt        DateTime @default(now())
+
+  users     User[]
+  products  Product[]
+  orders    Order[]
+  movements StockMovement[]
+}
+
+model User {
+  id          String   @id @default(cuid())
+  clerkId     String   @unique
+  tenantId    String?
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+  department  String?
+  role        UserRole @default(staff)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  org       Tenant?         @relation(fields: [tenantId], references: [id])
+  orders    Order[]
+  movements StockMovement[]
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  orgId      String
+  name       String
+  sku        String
+  category   String?
+  location   String?  
+  quantity   Int      @default(0)
+  price      Decimal  @db.Decimal(10, 2)
+  lowStockAt Int      @default(10)
+  createdAt  DateTime @default(now())
+
+  org        Tenant    @relation(fields: [orgId], references: [id])
+  movements  StockMovement[]
+  orderItems OrderItem[]
+
+  @@unique([orgId, sku])
+}
+
+model StockMovement {
+  id        String       @id @default(cuid())
+  orgId     String
+  productId String
+  userId    String
+  type      MovementType
+  quantity  Int
+  reason    String?
+  createdAt DateTime     @default(now())
+
+  org     Tenant @relation(fields: [orgId], references: [id])
+  product Product      @relation(fields: [productId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  orgId        String
+  userId       String
+  orderNumber  String
+  customerName String
+  status       OrderStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+
+  org   Tenant @relation(fields: [orgId], references: [id])
+  user  User         @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@unique([orgId, orderNumber])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+enum UserRole {
+  owner
+  manager
+  staff
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+}
