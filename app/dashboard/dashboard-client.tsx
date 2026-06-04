@@ -59,10 +59,10 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
   ]
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 text-[#1a1a1a]">
+    <div className="max-w-7xl mx-auto space-y-4 md:space-y-8 text-[#1a1a1a]">
       <div className="border-b pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">
             Welcome back! Here is an operational overview of your warehouse today.
           </p>
@@ -72,16 +72,16 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
           System Updated: Just Now
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {kpis.map((kpi, index) => {
           const Icon = kpi.icon
           return (
-            <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex items-start justify-between hover:border-gray-300 transition-colors">
+            <div key={index} className="bg-white border border-gray-200 rounded-xl p-3 md:p-6 shadow-sm flex items-start justify-between hover:border-gray-300 transition-colors">
               <div className="space-y-2">
                 <span className="text-xs font-medium text-gray-400 uppercase tracking-wider block">
                   {kpi.title}
                 </span>
-                <span className="text-2xl font-bold block">{kpi.value}</span>
+                <span className="text-xl md:text-2xl font-bold block">{kpi.value}</span>
                 <span className="text-xs font-medium text-green-600 flex items-center gap-0.5">
                   {kpi.change.startsWith('+') && <ArrowUpRight className="h-3 w-3" />}
                   {kpi.change}
