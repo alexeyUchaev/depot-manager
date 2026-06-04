@@ -60,7 +60,6 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 text-[#1a1a1a]">
-      
       <div className="border-b pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
@@ -73,8 +72,6 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
           System Updated: Just Now
         </div>
       </div>
-
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpis.map((kpi, index) => {
           const Icon = kpi.icon
@@ -97,11 +94,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
           )
         })}
       </div>
-
-      {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Activity Feed */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b pb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -112,12 +105,11 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
               Real-time Stream
             </span>
           </div>
-
           <div className="space-y-4">
             {stats.recentActivities.map((act) => (
               <div key={act.id} className="flex items-center justify-between p-3.5 bg-gray-50/50 hover:bg-gray-50 border border-gray-100 rounded-xl transition-all group">
                 <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
+                  <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
                     act.type === 'order' 
                       ? 'bg-green-500' 
                       : act.type === 'movement' 
@@ -131,7 +123,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
                     </span>
                   </div>
                 </div>
-                <div className="text-right flex items-center gap-2 flex-shrink-0">
+                <div className="text-right flex items-center gap-2 shrink-0">
                   {act.amount !== null && (
                     <span className="text-sm font-bold text-gray-900">
                       ${act.amount.toFixed(2)}
@@ -143,8 +135,6 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
             ))}
           </div>
         </div>
-
-        {/* Weekly Chart */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-6">
           <div className="border-b pb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -155,7 +145,6 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
               Total operations (IN + OUT) per day
             </p>
           </div>
-
           <div className="flex items-end justify-between h-44 pt-4 px-2">
             {stats.weeklyActivity.map((day, index) => {
               const heightPercent = maxCount > 0 ? (day.count / maxCount) * 100 : 0
@@ -173,7 +162,6 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
               )
             })}
           </div>
-
           <div className="pt-2 border-t border-gray-100 text-xs text-gray-500 flex justify-between">
             <span>Peak Day:</span>
             <span className="font-bold text-black">
@@ -181,9 +169,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
             </span>
           </div>
         </div>
-
       </div>
-
     </div>
   )
 }

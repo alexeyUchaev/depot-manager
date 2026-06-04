@@ -26,8 +26,7 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar>
-      
+    <Sidebar>      
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel  className="py-10 text-xl font-black" >Depot-Manager</SidebarGroupLabel>

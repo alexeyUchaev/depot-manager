@@ -37,10 +37,8 @@ const toDTO = (product: {
       : 'In Stock',
 })
 
-export const productService = {
 
-  // Получить все товары тенанта
-  async getAllByTenant(tenantId: string): Promise<ProductDTO[]> {
+export const getAllProductsByTenant = async (tenantId: string): Promise<ProductDTO[]> => {
     const products = await prisma.product.findMany({
       where: { orgId: tenantId },
       orderBy: { createdAt: 'desc' },
@@ -57,10 +55,10 @@ export const productService = {
       },
     })
     return products.map(toDTO)
-  },
+  }
 
-  // Получить один товар
-  async getById(id: string, tenantId: string): Promise<ProductDTO | null> {
+ 
+export const  getById = async (id: string, tenantId: string): Promise<ProductDTO | null> => {
     const product = await prisma.product.findFirst({
       where: { id, orgId: tenantId },
       select: {
@@ -76,10 +74,10 @@ export const productService = {
       },
     })
     return product ? toDTO(product) : null
-  },
+  }
 
-  // Получить low stock товары
-  async getLowStock(tenantId: string): Promise<ProductDTO[]> {
+ 
+export const  getLowStock = async (tenantId: string): Promise<ProductDTO[]> => {
     const products = await prisma.product.findMany({
       where: {
         orgId: tenantId,
@@ -98,10 +96,10 @@ export const productService = {
       },
     })
     return products.map(toDTO)
-  },
+  }
 
-  // Создать товар
-  async create(
+  
+export const  createProduct = async(
     tenantId: string,
     data: {
       name: string
@@ -112,7 +110,7 @@ export const productService = {
       quantity?: number
       lowStockAt?: number
     }
-  ): Promise<ActionResult<ProductDTO>> {
+  ): Promise<ActionResult<ProductDTO>> => {
     try {
       const existing = await prisma.product.findUnique({
         where: { orgId_sku: { orgId: tenantId, sku: data.sku } },
@@ -148,10 +146,11 @@ export const productService = {
     } catch {
       return { success: false, error: 'Failed to create product' }
     }
-  },
+  }
 
   // Обновить товар
-  async update(
+ 
+export const  updateProduct = async (
     id: string,
     tenantId: string,
     data: {
@@ -161,7 +160,7 @@ export const productService = {
       price?: number
       lowStockAt?: number
     }
-  ): Promise<ActionResult<ProductDTO>> {
+  ): Promise<ActionResult<ProductDTO>> => {
     try {
       const existing = await prisma.product.findFirst({
         where: { id, orgId: tenantId },
@@ -187,13 +186,13 @@ export const productService = {
     } catch {
       return { success: false, error: 'Failed to update product' }
     }
-  },
+  }
 
-  // Удалить товар
-  async delete(
+
+export const  deleteProduct = async (
     id: string,
     tenantId: string
-  ): Promise<ActionResult> {
+  ): Promise<ActionResult> => {
     try {
       const existing = await prisma.product.findFirst({
         where: { id, orgId: tenantId },
@@ -205,5 +204,4 @@ export const productService = {
     } catch {
       return { success: false, error: 'Failed to delete product' }
     }
-  },
-}
+  }

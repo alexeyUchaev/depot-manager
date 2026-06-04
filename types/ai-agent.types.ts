@@ -1,28 +1,23 @@
-// Типы для AI Agent с Cline-style интерфейсом
-
-// Статусы tool execution
 export type ToolStatus = 'pending' | 'executing' | 'success' | 'error'
 
-// Сам tool call с результатом
 export interface ToolCall {
-  id: string // уникальный ID для отслеживания
-  name: string // имя tool (getProducts, createOrder и т.д.)
-  input: Record<string, unknown> // параметры tool
+  id: string 
+  name: string
+  input: Record<string, unknown> 
   status: ToolStatus
-  result?: string // результат выполнения
-  error?: string // если была ошибка
+  result?: string 
+  error?: string 
   startTime: Date
   endTime?: Date
-  executionTime?: number // в миллисекундах
+  executionTime?: number
 }
 
-// Шаг в цепочке рассуждений агента
 export interface AgentStep {
   id: string
   type: 'thinking' | 'tool_call' | 'response'
-  thinking?: string // промежуточное рассуждение
-  toolCalls?: ToolCall[] // если это шаг с tool calls
-  response?: string // финальный ответ модели
+  thinking?: string 
+  toolCalls?: ToolCall[] 
+  response?: string
   timestamp: Date
 }
 
@@ -31,7 +26,7 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
-  steps?: AgentStep[] // для assistant - цепочка выполнения
+  steps?: AgentStep[]
   timestamp: Date
   isStreaming?: boolean
 }
