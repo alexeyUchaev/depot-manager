@@ -5,7 +5,7 @@ import AiTextArea from "./ai-text-area";
 
 type Message = { role: 'user' | 'ai'; text: string };
 
-export function ClineAgent({ isOpen }: { isOpen: boolean }) {
+export function ClineAgent() {
   const [toggle, setToggle] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");

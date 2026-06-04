@@ -1,55 +1,117 @@
-import { createGroq } from '@ai-sdk/groq'
-import { streamText } from 'ai'
-import { prisma } from '@/lib/prisma'
+import { GoogleGenAI } from "@google/genai";
+import { revalidatePath } from "next/cache";
+import { depotTools } from "@/lib/ai-tools";
+import { executeTool } from "@/lib/ai-executor";
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
-})
+export const runtime = "nodejs"; // нужен node-рантайм для executeTool/revalidatePath
 
-const DEMO_TENANT_ID = 'cmpk3vjwi00007g5dkg1dpryy'
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+
+const SYSTEM_INSTRUCTION = `You are the "Depot AI Agent", a smart, friendly, and highly proactive warehouse management assistant for Depot Manager. 
+Your job is to help users manage their inventory efficiently, keeping a welcoming and supportive tone. Act like an expert co-worker who is always ready to assist, but stay completely precise when it comes to data.
+### Core Rules & Capabilities:
+1. **Name & Identity:** Always operate as the "Depot AI Agent". 
+2. **Language:** Respond in the user's language, adjusting your tone to be helpful, communicative, and encouraging.
+3. **Fetching Data:** Whenever the user asks for real-time product information (stock levels, prices, categories, or general inventory status), ALWAYS call the getAllProductsByTenant tool. Never hallucinate, guess, or invent numbers.
+4. **Adding Inventory:** When a user wants to add a new item, proactively ask for any missing details if necessary, and call the createProduct tool to save it.
+5. **Low Stock Alerts:** Be proactive! If you notice that any product's current quantity is less than or equal to its lowStockAt threshold, warmly warn the user about the low stock so they can reorder in time.
+### Tone Guidelines:
+* Be conversational and clear. Instead of dry robotic answers, use phrases like "I'd be happy to check that for you!" or "All set! I've successfully added that to the system."
+* Keep track of the context to guide the user smoothly through warehouse operations..`;
 
 export async function POST(req: Request) {
-  const { messages } = await req.json()
 
-  const products = await prisma.product.findMany({
-    where: { orgId: DEMO_TENANT_ID },
-    select: {
-      name: true,
-      sku: true,
-      category: true,
-      quantity: true,
-      price: true,
-      lowStockAt: true,
-      location: true,
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (type: string, content: unknown) => {
+        controller.enqueue(
+          encoder.encode(`data: ${JSON.stringify({ type, content })}\n\n`)
+        );
+      };
+
+      try {
+        if (!process.env.GEMINI_API_KEY) {
+          send("error", "GEMINI_API_KEY не задан в .env.local (и нужен рестарт сервера)");
+          return;
+        }
+
+        const { messages } = await req.json();
+        console.log("📨 messages:", messages?.length);
+
+        if (!Array.isArray(messages) || messages.length === 0) {
+          send("error", "Empty msgs array");
+          return;
+        }
+
+        const history = [...messages];
+        const lastMessageObj = history.pop();
+        const userMessage = lastMessageObj?.parts?.[0]?.text ?? "";
+
+        if (!userMessage.trim()) {
+          send("error", "Empty usr msg");
+          return;
+        }
+
+        const chat = ai.chats.create({
+          model: "gemini-2.5-flash-lite",
+          history,
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+            tools: [{ functionDeclarations: depotTools }],
+          },
+        });
+
+        const result = await chat.sendMessage({ message: userMessage });
+
+        const call = result.functionCalls?.[0];
+
+        if (call?.name) {
+          console.log("🔧 tool call:", call.name);
+          send("tool_call", { tool: call.name, args: call.args });
+
+          const toolResult = await executeTool(call.name, call.args);
+
+          revalidatePath("/inventory");
+          revalidatePath("/orders");
+
+          const finalResult = await chat.sendMessage({
+            message: [
+              {
+                functionResponse: {
+                  name: call.name,
+                  response: { result: toolResult },
+                },
+              },
+            ],
+          });
+
+          send("text", finalResult.text ?? "");
+        } else {
+          send("text", result.text ?? "");
+        }
+      } catch (error: unknown) {
+        console.error("=== BACKEND CRITICAL ERROR ===", error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : typeof error === "string"
+            ? error
+            : "Unknown Gemini API Error";
+        send("error", message);
+      } finally {
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      }
     },
-  })
+  });
 
-  const orders = await prisma.order.findMany({
-    where: { orgId: DEMO_TENANT_ID },
-    orderBy: { createdAt: 'desc' },
-    take: 10,
-    select: {
-      orderNumber: true,
-      customerName: true,
-      status: true,
-      createdAt: true,
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
     },
-  })
-
-  const result = streamText({
-    model: groq('llama-3.3-70b-versatile'),
-    system: `You are a warehouse management assistant for Depot Manager.
-    
-Current inventory:
-${JSON.stringify(products, null, 2)}
-
-Recent orders:
-${JSON.stringify(orders, null, 2)}
-
-Answer questions about stock levels, orders, and warehouse operations.
-Be concise and helpful. If a product is below lowStockAt, warn about it.`,
-    messages,
-  })
-
-return result.toUIMessageStreamResponse()
+  });
 }
