@@ -4,6 +4,8 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ClineAgent } from "@/components/ai-agent/cline-agent";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 
 const geistSans = Geist({
@@ -32,12 +34,14 @@ export default function RootLayout({
       >
         <body className="min-h-full flex flex-col">
           <SidebarProvider>
+            <Header/>
             <AppSidebar />
-              <main className="flex-1 p-6">
+              <main className="flex-1 p-3 md:p-6">
                 <SidebarTrigger />
                 {children}
               </main>
             <ClineAgent />
+            <Footer/>
           </SidebarProvider>  
         </body>
       </html>

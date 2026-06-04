@@ -37,7 +37,7 @@ export function ClineAgent() {
       parts: [{ text: m.text }],
     }));
 
-    setMessages((prev) => [...prev, userMsg, { role: 'ai', text: "Думаю..." }]);
+    setMessages((prev) => [...prev, userMsg, { role: 'ai', text: "Thinking..." }]);
     setInputText("");
     setIsLoading(true);
 
@@ -50,7 +50,7 @@ export function ClineAgent() {
 
       if (!response.ok || !response.body) {
         const errText = await response.text().catch(() => "");
-        updateLastMessage(() => `❌ Сервер вернул ${response.status}. ${errText.slice(0, 300)}`);
+        updateLastMessage(() => `${errText.slice(0, 300)}`);
         return;
       }
 
@@ -88,15 +88,15 @@ export function ClineAgent() {
           if (data.type === 'text') {
             updateLastMessage((t) => t + data.content);
           } else if (data.type === 'tool_call') {
-            updateLastMessage(() => `⚙️ Вызываю инструмент: ${data.content.tool}...`);
+            updateLastMessage(() => `⚙️ I'm gonna use ${data.content.tool}...`);
           } else if (data.type === 'error') {
-            updateLastMessage(() => `❌ Ошибка: ${data.content}`);
+            updateLastMessage(() => `${data.content}`);
           }
         }
       }
     } catch (e) {
-      console.error("Ошибка стрима:", e);
-      updateLastMessage(() => "❌ Не удалось связаться с сервером.");
+      console.error("Error:", e);
+      updateLastMessage(() => "Try again...");
     } finally {
       setIsLoading(false);
     }
