@@ -37,7 +37,7 @@ export function ClineAgent() {
       parts: [{ text: m.text }],
     }));
 
-    setMessages((prev) => [...prev, userMsg, { role: 'ai', text: "Думаю..." }]);
+    setMessages((prev) => [...prev, userMsg, { role: 'ai', text: "Thinking..." }]);
     setInputText("");
     setIsLoading(true);
 
@@ -50,7 +50,7 @@ export function ClineAgent() {
 
       if (!response.ok || !response.body) {
         const errText = await response.text().catch(() => "");
-        updateLastMessage(() => `❌ Сервер вернул ${response.status}. ${errText.slice(0, 300)}`);
+        updateLastMessage(() => `${errText.slice(0, 300)}`);
         return;
       }
 
@@ -88,22 +88,22 @@ export function ClineAgent() {
           if (data.type === 'text') {
             updateLastMessage((t) => t + data.content);
           } else if (data.type === 'tool_call') {
-            updateLastMessage(() => `⚙️ Вызываю инструмент: ${data.content.tool}...`);
+            updateLastMessage(() => `⚙️ I'm gonna use ${data.content.tool}...`);
           } else if (data.type === 'error') {
-            updateLastMessage(() => `❌ Ошибка: ${data.content}`);
+            updateLastMessage(() => `${data.content}`);
           }
         }
       }
     } catch (e) {
-      console.error("Ошибка стрима:", e);
-      updateLastMessage(() => "❌ Не удалось связаться с сервером.");
+      console.error("Error:", e);
+      updateLastMessage(() => "Try again...");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <>
+    <div className="hidden md:block">
       <div>
         <button className="p-3 top-0 relative flex justify-start" onClick={() => setToggle((p) => !p)}>
           {toggle ? <CgToggleSquare /> : <CgToggleSquareOff />}
@@ -113,15 +113,15 @@ export function ClineAgent() {
         <div className="py-2.5 text-xl font-black text-[#423737] text-center border-b border-[#00000024]">
           Depot-AI-Agent
         </div>
-        <div className="grow min-h-0 flex flex-col gap-2 p-2 bg-[#ffffffde] overflow-y-auto" ref={scrollRef}>
+        <div className="grow min-h-0 flex flex-col gap-2 p-1 md:p-2 bg-[#ffffffde] overflow-y-auto" ref={scrollRef}>
           {messages.map((m, i) => (
-            <div key={i} className={`max-w-[85%] p-2 rounded whitespace-pre-wrap break-words ${m.role === 'user' ? 'bg-blue-100 self-end' : 'bg-white border self-start'}`}>
+            <div key={i} className={`max-w-[85%] p-1 md:p-2 rounded whitespace-pre-wrap wrap-break-word ${m.role === 'user' ? 'bg-blue-100 self-end' : 'bg-white border self-start'}`}>
               {m.text}
             </div>
           ))}
         </div>
         <AiTextArea value={inputText} onChange={(e) => setInputText(e.target.value)} onSend={handleSendMessage} disabled={isLoading} />
       </div>
-    </>
+    </div>
   );
 }
