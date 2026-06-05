@@ -29,13 +29,13 @@ export function AppSidebar() {
     <Sidebar>      
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel  className="py-10 text-xl font-black" >Depot-Manager</SidebarGroupLabel>
+          <SidebarGroupLabel  className="py-10 text-xl font-black text-black" >Depot-Manager</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem className="p-2" key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <Link href={item.url} className="text-black">
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

@@ -22,7 +22,7 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData | null }
   const totalMovements = data.movementsSummary.inUnits + data.movementsSummary.outUnits
 
   return (
-    <div className="p-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 text-[#1a1a1a]">
+    <div className="p-2 pb-10 md:pb-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 text-[#1a1a1a]">
       <div className="border-b pb-5">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Business Analytics</h1>
         <p className="text-sm text-gray-500 mt-1">
