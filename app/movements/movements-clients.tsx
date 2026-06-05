@@ -185,7 +185,6 @@ export default function MovementsClient({ movements }: { movements: MovementDTO[
               {movements.map((mov) => (
                 <tr
                   key={mov.id}
-                  onClick={() => setSelected(mov)}
                   className="hover:bg-gray-50/50 transition-colors cursor-pointer"
                 >
                   <td className="px-6 py-4">
