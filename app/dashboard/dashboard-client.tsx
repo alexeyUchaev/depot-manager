@@ -59,7 +59,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
   ]
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 md:space-y-8 text-[#1a1a1a]">
+    <div className="max-w-7xl mx-auto pb-10 pt-6 md:pb-2 md:pt-2 space-y-4 md:space-y-8 text-[#1a1a1a]">
       <div className="border-b pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
