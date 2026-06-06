@@ -115,10 +115,15 @@ export function ClineAgent() {
         {toggle && (
           <div className="relative flex h-dvh w-[280px] flex-col">
             <div className="fixed flex h-dvh w-[280px] flex-col bg-sidebar text-sidebar-foreground border-l border-sidebar-border">
-              <div className="px-4 py-3 text-xl font-black border-b ">
+              <div className="px-4 py-3 text-md font-black border-b ">
                 Depot-AI-Agent
               </div>
-              <div className="grow min-h-0 flex flex-col gap-2 px-3 py-3  overflow-y-auto" ref={scrollRef}>
+              <div className="grow min-h-0 flex flex-col gap-2 px-3 py-3 overflow-y-auto bg-white" ref={scrollRef}>
+                {messages.length === 0 && (
+                  <div className="text-xs text-gray-600 text-center mt-6">
+                    Ask anything about your inventory…
+                  </div>
+                )}                
                 {messages.map((m, i) => (
                   <div
                     key={i}
