@@ -46,7 +46,7 @@ export default function UsersPage() {
   const [selected, setSelected] = useState<UserRow | null>(null);
 
   return (
-    <div className="p-2 md:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 text-[#1a1a1a]">
+    <div className="p-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-[#1a1a1a]">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Team Management</h1>
