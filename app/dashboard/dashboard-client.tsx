@@ -72,7 +72,7 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
           System Updated: Just Now
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-6">
         {kpis.map((kpi, index) => {
           const Icon = kpi.icon
           return (
@@ -81,14 +81,14 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
                 <span className="text-xs font-medium text-gray-400 uppercase tracking-wider block">
                   {kpi.title}
                 </span>
-                <span className="text-xl md:text-2xl font-bold block">{kpi.value}</span>
+                <span className="text-xl md:text-lg font-bold block">{kpi.value}</span>
                 <span className="text-xs font-medium text-green-600 flex items-center gap-0.5">
                   {kpi.change.startsWith('+') && <ArrowUpRight className="h-3 w-3" />}
                   {kpi.change}
                 </span>
               </div>
-              <div className={`p-3 bg-gray-50 rounded-lg border border-gray-100 ${kpi.color}`}>
-                <Icon className="h-5 w-5" />
+              <div className={`p-2 bg-gray-50 rounded-lg border border-gray-100 ${kpi.color}`}>
+                <Icon className="h-4 w-4" />
               </div>
             </div>
           )

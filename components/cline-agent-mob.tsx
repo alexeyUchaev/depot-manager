@@ -122,8 +122,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
             <div className="text-xs text-gray-600 text-center mt-6">
             Ask anything about your inventory…
             </div>
-        )}    
-      {/* Messages */}
+        )}  
       <div className="grow min-h-0 flex flex-col gap-2 px-3 py-3 overflow-y-auto" ref={scrollRef}>
         {messages.map((m, i) => (
           <div

@@ -76,7 +76,7 @@ export function ClineAgent() {
           try {
             data = JSON.parse(dataStr);
           } catch (parseError) {
-            console.error("Ошибка парсинга JSON:", line, parseError);
+            console.error("JSON Error:", line, parseError);
             continue;
           }
 

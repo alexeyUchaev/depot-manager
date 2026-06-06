@@ -17,7 +17,7 @@ export default function Header() {
                 <span className="w-5 h-[2px] bg-[#202020]"></span>
                 <span className="w-5 h-[2px] bg-[#202020]"></span>
             </button> 
-            <div className="text-sm font-black flex items-center justify-center border border-[#383838] bg-[#ffffff] rounded-[3px] p-1">
+            <div className="text-sm font-black flex items-center justify-center border border-[#b1b1b1] bg-[#ffffff] rounded-[3px] p-1">
                 <div className="relative flex justify-center items-center w-[18px] h-[18px] pl-7">
                     <Image
                         src={logo}
