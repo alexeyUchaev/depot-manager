@@ -156,19 +156,19 @@ export default function MobAI({ isOpen }: MobAIProps) {
             }}
           />
           {supported && (
-  <button
-    type="button"
-    onClick={toggle}
-    aria-label="Voice input"
-    className={`absolute right-12 bottom-2 p-2 rounded-lg transition-colors ${
-      listening
-        ? 'bg-red-500 text-white animate-pulse'
-        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-    }`}
-  >
-    <FaMicrophone className="h-3 w-3" />
-  </button>
-)}
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label="Voice input"
+              className={`absolute right-12 bottom-2 p-2 rounded-lg transition-colors ${
+                listening
+                  ? 'bg-red-500 text-white animate-pulse'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <FaMicrophone className="h-3 w-3" />
+            </button>
+          )}
           <button
             onClick={handleSendMessage}
             disabled={isLoading}
