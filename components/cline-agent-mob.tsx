@@ -2,6 +2,8 @@
 
 import { FaAngleDoubleRight } from "react-icons/fa"
 import { useEffect, useRef, useState } from "react"
+import { FaMicrophone } from "react-icons/fa"
+import { useSpeech } from "@/hooks/use-speech"
 
 type Message = { role: 'user' | 'ai'; text: string }
 
@@ -12,6 +14,8 @@ interface MobAIProps {
 export default function MobAI({ isOpen }: MobAIProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState("")
+  const { listening, supported, toggle } = useSpeech((text) =>
+  setInputText((prev) => (prev ? prev + " " : "") + text))
   const [isLoading, setIsLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -151,6 +155,20 @@ export default function MobAI({ isOpen }: MobAIProps) {
               }
             }}
           />
+          {supported && (
+  <button
+    type="button"
+    onClick={toggle}
+    aria-label="Voice input"
+    className={`absolute right-12 bottom-2 p-2 rounded-lg transition-colors ${
+      listening
+        ? 'bg-red-500 text-white animate-pulse'
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+    }`}
+  >
+    <FaMicrophone className="h-3 w-3" />
+  </button>
+)}
           <button
             onClick={handleSendMessage}
             disabled={isLoading}

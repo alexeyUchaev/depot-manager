@@ -104,7 +104,6 @@ export function ClineAgent() {
 
     return (
       <div className="hidden md:block">
-        {/* кнопка — fixed, всегда кликабельна */}
         <button
           onClick={() => setToggle((p) => !p)}
           aria-label="Toggle AI agent"
