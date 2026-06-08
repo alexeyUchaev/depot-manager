@@ -46,7 +46,7 @@ export default function UsersPage() {
   const [selected, setSelected] = useState<UserRow | null>(null);
 
   return (
-    <div className="p-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-[#1a1a1a]">
+    <div className="p-2 md:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 text-[#1a1a1a]">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Team Management</h1>
@@ -95,15 +95,15 @@ export default function UsersPage() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 <th className="px-6 py-4">Name / Email</th>
-                <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Department</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 hidden lg:table-cell">Role</th>
+                <th className="px-6 py-4 hidden xl:table-cell">Department</th>
+                <th className="px-6 py-4 hidden xl:table-cell">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-sm">
               {users.map((user) => (
-                <tr key={user.id} onClick={() => setSelected(user)}
+                <tr key={user.id}
                   className="hover:bg-gray-50/70 transition-colors cursor-pointer">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -118,10 +118,10 @@ export default function UsersPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4"><RoleBadge role={user.role} /></td>
-                  <td className="px-6 py-4 text-gray-600 text-sm">{user.department}</td>
-                  <td className="px-6 py-4"><StatusBadge status={user.status} /></td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 hidden lg:table-cell"><RoleBadge role={user.role} /></td>
+                  <td className="px-6 py-4 text-gray-600 text-sm hidden xl:table-cell">{user.department}</td>
+                  <td className="px-6 py-4 hidden lg:table-cell"><StatusBadge status={user.status} /></td>
+                  <td className="px-6 py-4 text-right ">
                     <button
                       onClick={(e) => { e.stopPropagation(); alert("Demo Mode: Action restricted."); }}
                       className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 transition-colors"

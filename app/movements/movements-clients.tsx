@@ -176,9 +176,9 @@ export default function MovementsClient({ movements }: { movements: MovementDTO[
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Product / SKU</th>
                 <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Quantity</th>
-                <th className="px-6 py-4">Reason</th>
-                <th className="px-6 py-4">Operator</th>
+                <th className="px-6 py-4 hidden 2xl:table-cell">Quantity</th>
+                <th className="px-6 py-4 hidden 2xl:table-cell">Reason</th>
+                <th className="px-6 py-4 hidden 2xl:table-cell">Operator</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-sm">
@@ -202,18 +202,18 @@ export default function MovementsClient({ movements }: { movements: MovementDTO[
                   <td className="px-6 py-4">
                     <TypeBadge type={mov.type} />
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 hidden 2xl:table-cell">
                     <span className={`font-bold text-sm ${mov.type === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
                       {mov.type === 'IN' ? '+' : '-'}{mov.quantity}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-600">
+                  <td className="px-6 py-4 text-xs text-gray-600 hidden 2xl:table-cell">
                     <div className="flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-gray-400" />
                       <span className="truncate max-w-[180px]">{mov.reason ?? '—'}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 hidden 2xl:table-cell">
                     <div className="flex items-center gap-1.5 text-xs text-gray-700 font-medium">
                       <User className="h-3.5 w-3.5 text-gray-400" />
                       {[mov.user.firstName, mov.user.lastName].filter(Boolean).join(' ')}

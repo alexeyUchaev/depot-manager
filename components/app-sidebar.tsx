@@ -10,12 +10,14 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { ArrowLeftRight, BarChart3, Building2, LayoutDashboard, Package, ShoppingCart, Users } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import logo from "@/app/icon.svg"
 import { usePathname } from "next/navigation"
+import { SheetClose } from "./ui/sheet"
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -29,23 +31,23 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar()
 
   return (
     <Sidebar className="border-r border-gray-200">
       <SidebarContent className="bg-white">
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 pt-6 pb-4 text-lg font-bold tracking-tight text-gray-900">
-            <div className="text-sm font-black flex items-center justify-center border border-[#e2e2e2] bg-[#ffffff] rounded-[3px] p-1">
-                <div className="relative flex justify-center items-center w-[18px] h-[18px] pl-7">
-                    <Image
-                        src={logo}
-                        alt="logo" 
-                        fill={true}           
-                    />
-                </div>
-                <div className="flex justify-center items-center pr-2 mt-0.5">
-                    DepotAI
-                </div>               
+            <div className="inline-flex items-end gap-2 rounded-[4px] border border-neutral-600 bg-[#111111] px-3 py-1.5 text-sm font-black text-white">
+                <Image
+                src={logo}
+                alt="DepotAI logo"
+                width={18}
+                height={18}
+                className="hidden md:block brightness invert shrink-0 object-contain object-bottom"
+                />
+                <span className="hidden md:block leading-none">DepotAI</span>
+                <span className="block md:hidden pt-1 leading-none">MENU</span>
             </div>       
           </SidebarGroupLabel>
           <SidebarGroupContent className="px-2 pt-10">
@@ -62,10 +64,13 @@ export function AppSidebar() {
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                     >
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
+                        <Link 
+                          href={item.url}
+                          onClick={() => setOpenMobile(false)}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -75,7 +80,9 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4 border-t border-gray-200 bg-white">
-        <div className="text-xs text-gray-400 uppercase tracking-wider">v1.0</div>
+        <div className="text-xs text-gray-400 uppercase tracking-wider">
+          v1.0
+        </div>
       </SidebarFooter>
     </Sidebar>
   )

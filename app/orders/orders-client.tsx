@@ -83,10 +83,10 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
               <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 <th className="px-6 py-4">Order ID / Date</th>
                 <th className="px-6 py-4">Customer</th>
-                <th className="px-6 py-4">Items</th>
-                <th className="px-6 py-4">Assigned To</th>
-                <th className="px-6 py-4">Total Amount</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 hidden lg:table-cell">Items</th>
+                <th className="px-6 py-4 hidden 2xl:table-cell">Assigned To</th>
+                <th className="px-6 py-4 hidden 2xl:table-cell">Total Amount</th>
+                <th className="px-6 py-4 hidden 2xl:table-cell">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -101,12 +101,12 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
                     </div>
                   </td>
                   <td className="px-6 py-4"><div className="font-medium text-gray-900">{order.customerName}</div></td>
-                  <td className="px-6 py-4 max-w-xs">
+                  <td className="px-6 py-4 max-w-xs hidden lg:table-cell">
                     <div className="text-gray-800 font-medium truncate">
                       {order.items.map(i => `${i.product.name} ×${i.quantity}`).join(', ')}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 hidden 2xl:table-cell">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold">
                         {order.assignedTo.split(' ').map(n => n[0]).join('')}
@@ -114,8 +114,8 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
                       <span className="text-sm text-gray-700">{order.assignedTo}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-bold text-gray-900">${order.total.toFixed(2)}</td>
-                  <td className="px-6 py-4"><StatusBadge status={order.status} /></td>
+                  <td className="px-6 py-4 font-bold text-gray-900 hidden 2xl:table-cell">${order.total.toFixed(2)}</td>
+                  <td className="px-6 py-4 hidden 2xl:table-cell"><StatusBadge status={order.status} /></td>
                   <td className="px-6 py-4 text-right">
                     <button className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 transition-colors">
                       <MoreVertical className="h-4 w-4" />

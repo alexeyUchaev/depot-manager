@@ -29,13 +29,13 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData | null }
           Real-time breakdown of revenue, inventory valuation, and stock performance.
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white border border-gray-200 rounded-xl p-5 md:p-6 shadow-sm flex items-center justify-between">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-3">
+        <div className="bg-white border border-gray-200 rounded-xl p-3 md:p-3 shadow-sm flex items-center justify-between">
           <div className="space-y-2 min-w-0">
             <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
               Gross Revenue (MTD)
             </span>
-            <div className="text-2xl font-bold truncate">${data.grossRevenue.toFixed(2)}</div>
+            <div className="text-xl font-bold truncate">${data.grossRevenue.toFixed(2)}</div>
             <span className={`inline-flex items-center text-xs font-medium ${data.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {data.revenueGrowth >= 0
                 ? <ArrowUpRight className="h-3 w-3 mr-0.5" />
@@ -48,24 +48,24 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData | null }
             <DollarSign className="h-5 w-5 text-gray-500" />
           </div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-5 md:p-6 shadow-sm flex items-center justify-between">
+        <div className="bg-white border border-gray-200 rounded-xl p-3 md:p-3 shadow-sm flex items-center justify-between">
           <div className="space-y-2 min-w-0">
             <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
               Inventory Valuation
             </span>
-            <div className="text-2xl font-bold truncate">${data.inventoryValuation.toFixed(2)}</div>
+            <div className="text-xl font-bold truncate">${data.inventoryValuation.toFixed(2)}</div>
             <span className="text-xs text-gray-500">Total stock asset value</span>
           </div>
           <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 shrink-0">
             <Package className="h-5 w-5 text-gray-500" />
           </div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-5 md:p-6 shadow-sm flex items-center justify-between">
+        <div className="bg-white border border-gray-200 rounded-xl p-3 md:p-3 shadow-sm flex items-center justify-between">
           <div className="space-y-2 min-w-0">
             <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
               Total Orders (MTD)
             </span>
-            <div className="text-2xl font-bold truncate">{data.totalOrders} Orders</div>
+            <div className="text-xl font-bold truncate">{data.totalOrders} Orders</div>
             <span className="inline-flex items-center text-xs font-medium text-green-600">
               <ArrowUpRight className="h-3 w-3 mr-0.5" /> This month
             </span>

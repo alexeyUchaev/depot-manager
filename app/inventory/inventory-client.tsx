@@ -80,10 +80,10 @@ export default function InventoryClient({ products }: { products: ProductDTO[] }
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 <th className="px-6 py-4">Product / SKU</th>
-                <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4">Warehouse Location</th>
+                <th className="px-6 py-4 hidden xl:table-cell">Category</th>
+                <th className="px-6 py-4 hidden xl:table-cell">Warehouse Location</th>
                 <th className="px-6 py-4">Price</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 hidden xl:table-cell">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -95,18 +95,18 @@ export default function InventoryClient({ products }: { products: ProductDTO[] }
                     <div className="font-semibold text-gray-900 truncate">{product.name}</div>
                     <div className="text-xs font-mono text-gray-400 mt-1 bg-gray-50 inline-block px-1.5 py-0.5 rounded border border-gray-100">{product.sku}</div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 hidden xl:table-cell">
                     <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 border border-gray-200 font-medium">
                       <Package className="h-3 w-3" /> {product.category ?? '—'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 hidden xl:table-cell">
                     <div className="text-gray-700 flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5 text-gray-400" /> {product.location ?? '—'}
                     </div>
                   </td>
                   <td className="px-6 py-4 font-semibold text-gray-900">${product.price.toFixed(2)}</td>
-                  <td className="px-6 py-4"><StatusBadge status={product.status} quantity={product.quantity} /></td>
+                  <td className="px-6 py-4 hidden xl:table-cell"><StatusBadge status={product.status} quantity={product.quantity} /></td>
                   <td className="px-6 py-4 text-right">
                     <button className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 transition-colors">
                       <MoreVertical className="h-4 w-4" />
