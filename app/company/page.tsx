@@ -45,7 +45,7 @@ export default function CompanyPage() {
             Manage your organization details and subscription plan.
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200 shrink-0">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-900 shrink-0">
           <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
           {companyData.status}
         </span>
@@ -184,7 +184,7 @@ export default function CompanyPage() {
               <div className="space-y-2 text-sm text-gray-600">
                 {companyData.plan.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-green-600 shrink-0" />
+                    <ShieldCheck className="h-4 w-4 text-green-600 dark:text-green-400 dark:text-green-400. shrink-0" />
                     <span>{feature}</span>
                   </div>
                 ))}
@@ -195,7 +195,7 @@ export default function CompanyPage() {
               </div>
               <button
                 onClick={() => alert("Demo Mode: Upgrade restricted.")}
-                className="w-full py-2 border border-black text-black rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                className="w-full py-2  border border-primary text-primary hover:bg-muted rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
               >
                 Upgrade Plan
               </button>
