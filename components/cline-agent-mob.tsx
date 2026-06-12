@@ -120,7 +120,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
       </div>
         {messages.length === 0 && (
             <div className="text-xs text-gray-600 text-center mt-6">
-            Ask anything about your inventory…
+              Ask anything about your inventory…
             </div>
         )}  
       <div className="grow min-h-0 flex flex-col gap-2 px-3 py-3 overflow-y-auto" ref={scrollRef}>
@@ -130,19 +130,17 @@ export default function MobAI({ isOpen }: MobAIProps) {
             className={`max-w-[95%] px-3 py-2 text-sm whitespace-pre-wrap break-words shadow-sm ${
               m.role === 'user'
                 ? 'bg-black text-white self-end rounded-xl rounded-br-sm'
-                : 'bg-white border border-gray-200 text-gray-800 self-start rounded-xl rounded-bl-sm'
+                : 'bg-card border text-card-foregroundself-start rounded-xl rounded-bl-sm'
             }`}
           >
             {m.text}
           </div>
         ))}
       </div>
-
-      {/* Input */}
       <div className="p-3 border-t border-sidebar-border">
-        <div className="relative bg-white border border-gray-200 rounded-xl shadow-sm w-full h-[100px] focus-within:ring-2 focus-within:ring-black focus-within:border-transparent transition">
+        <div className="relative bg-card border rounded-xl shadow-sm w-full h-[100px] focus-within:ring-2 focus-within:ring-ring focus-within:border-transparent transition">
           <textarea
-            className="h-full w-full align-top resize-none outline-none bg-transparent text-sm text-gray-900 placeholder:text-gray-400 px-3 py-2 pr-10 disabled:opacity-60"
+            className="h-full w-full align-top resize-none outline-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground px-3 py-2 pr-10 disabled:opacity-60"
             placeholder="Type a message..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -162,7 +160,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
               className={`absolute right-12 bottom-2 p-2 rounded-lg transition-colors ${
                 listening
                   ? 'bg-red-500 text-white animate-pulse'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
               <FaMicrophone className="h-3 w-3" />
@@ -171,7 +169,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
           <button
             onClick={handleSendMessage}
             disabled={isLoading}
-            className="absolute right-2 bottom-2 p-2 rounded-lg bg-black text-white hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="absolute right-2 bottom-2 p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             aria-label="Send"
           >
             <FaAngleDoubleRight className="h-3 w-3" />

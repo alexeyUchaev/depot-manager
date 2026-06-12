@@ -12,12 +12,12 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { ThemeToggle  } from "./theme-toggle"
 import { ArrowLeftRight, BarChart3, Building2, LayoutDashboard, Package, ShoppingCart, Users } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import logo from "@/app/icon.svg"
 import { usePathname } from "next/navigation"
-import { SheetClose } from "./ui/sheet"
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -34,10 +34,10 @@ export function AppSidebar() {
   const { setOpenMobile } = useSidebar()
 
   return (
-    <Sidebar className="border-r border-gray-200">
-      <SidebarContent className="bg-white">
+    <Sidebar>
+      <SidebarContent >
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 pt-6 pb-4 text-lg font-bold tracking-tight text-gray-900">
+          <SidebarGroupLabel className="px-4 pt-6 pb-4 text-lg font-bold tracking-tight text-sidebar-foreground">
             <div className="inline-flex items-end gap-2 rounded-[4px] border border-neutral-600 bg-[#111111] px-3 py-1.5 text-sm font-black text-white">
                 <Image
                 src={logo}
@@ -60,8 +60,8 @@ export function AppSidebar() {
                       asChild
                       className={`h-9 rounded-lg px-3 text-sm font-medium transition-colors ${
                         active
-                          ? 'bg-gray-100 text-gray-900'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                       }`}
                     >
                         <Link 
@@ -73,15 +73,18 @@ export function AppSidebar() {
                         </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                );
+                );                
               })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t border-gray-200 bg-white">
-        <div className="text-xs text-gray-400 uppercase tracking-wider">
-          v1.0
+      <SidebarFooter className="p-4 border-t">
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider">
+            v1.0
+          </div>
+          <ThemeToggle />
         </div>
       </SidebarFooter>
     </Sidebar>

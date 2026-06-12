@@ -4,6 +4,7 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ClineAgent } from "@/components/ai-agent/cline-agent";
+import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -30,19 +31,27 @@ export default function RootLayout({
   return (
       <html
         lang="en"
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col ">
-          <SidebarProvider>
-            <Header/>
-            <AppSidebar />
-              <main className="flex-1 min-w-0 p-3 md:p-6">
-                <SidebarTrigger />
-                {children}
-              </main>
-            <ClineAgent />
-            <Footer/>
-          </SidebarProvider>  
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SidebarProvider>
+              <Header/>
+              <AppSidebar />
+                <main className="flex-1 min-w-0 p-3 md:p-6">
+                  <SidebarTrigger />
+                  {children}
+                </main>
+              <ClineAgent />
+              <Footer/>
+            </SidebarProvider>  
+          </ThemeProvider>
         </body>
       </html>
   );

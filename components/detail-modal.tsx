@@ -37,20 +37,20 @@ export function DetailModal({ title, header, badges, rows, children, onClose }: 
       <div className="fixed top-40 w-full px-2 z-50 flex items-end sm:items-center justify-center">
         <button
           onClick={onClose}
-          className="fixed top-40 right-4 z-10 p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 shadow-md transition-colors"
+          className="fixed top-40 right-4 z-10 p-2 rounded-full bg-card/90 hover:bg-card text-card-foreground shadow-md transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
-        <div className="relative w-full sm:max-w-md bg-white rounded-2xl shadow-xl max-h-[85vh] overflow-y-auto">
+        <div className="relative w-full sm:max-w-md bg-card rounded-2xl shadow-xl max-h-[85vh] overflow-y-auto">
           <div className="p-6 space-y-5">
             {header}
-            <h2 className="text-xl font-bold text-gray-900 wrap-break-word">{title}</h2>
+            <h2 className="text-xl font-bold text-card-foreground wrap-break-word">{title}</h2>
             {badges}
-            <div className="divide-y divide-gray-100 border-t border-gray-100">
+            <div className="divide-y divide-border border-t">
               {rows.map((row) => (
                 <div key={row.label} className="flex items-center justify-between py-3 text-sm gap-3">
-                  <dt className="text-gray-500 shrink-0">{row.label}</dt>
-                  <dd className="font-medium text-gray-900 text-right wrap-break-word min-w-0">{row.value}</dd>
+                  <dt className="text-muted-foreground shrink-0">{row.label}</dt>
+                  <dd className="font-medium text-card-foreground text-right wrap-break-word min-w-0">{row.value}</dd>
                 </div>
               ))}
             </div>

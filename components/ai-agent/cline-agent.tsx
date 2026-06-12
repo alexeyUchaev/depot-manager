@@ -117,9 +117,9 @@ export function ClineAgent() {
               <div className="px-4 py-3 text-md font-black border-b ">
                 Depot-AI-Agent
               </div>
-              <div className="grow min-h-0 flex flex-col gap-2 px-3 py-3 overflow-y-auto bg-white" ref={scrollRef}>
+              <div className="grow min-h-0 flex flex-col gap-2 px-3 py-3 overflow-y-auto bg-background" ref={scrollRef}>
                 {messages.length === 0 && (
-                  <div className="text-xs text-gray-600 text-center mt-6">
+                  <div className="text-xs text-muted-foreground text-center mt-6">
                     Ask anything about your inventory…
                   </div>
                 )}                
@@ -128,8 +128,8 @@ export function ClineAgent() {
                     key={i}
                     className={`max-w-[85%] px-3 py-2 text-sm whitespace-pre-wrap wrap-break-word shadow-sm ${
                       m.role === 'user'
-                        ? 'bg-black text-white self-end rounded-xl rounded-br-sm'
-                        : 'bg-white border border-gray-200 text-gray-800 self-start rounded-xl rounded-bl-sm'
+                        ? 'bg-primary text-primary-foreground self-end rounded-xl rounded-br-sm'
+                        : '	bg-card border text-card-foreground self-start rounded-xl rounded-bl-sm'
                     }`}
                   >
                     {m.text}
