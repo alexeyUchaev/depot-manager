@@ -37,11 +37,11 @@ export default function CompanyPage() {
   };
 
   return (
-    <div className="p-2 pb-10 md:pb-2 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 md:space-y-8 text-[#1a1a1a]">
+    <div className="p-2 pb-10 md:pb-2 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 md:space-y-8 text-foreground">
       <div className="flex items-center justify-between border-b pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Company Profile</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Manage your organization details and subscription plan.
           </p>
         </div>
@@ -52,94 +52,95 @@ export default function CompanyPage() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 md:p-6">
+          <div className="bg-card border rounded-xl shadow-sm p-5 md:p-6">
             <div className="flex items-center gap-2 mb-6 border-b pb-3">
-              <Building2 className="h-5 w-5 text-gray-500" />
+              <Building2 className="h-5 w-5 text-muted-foreground" />
               <h2 className="text-lg font-semibold">General Information</h2>
             </div>
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Company Legal Name
                 </label>
                 <input
                   type="text"
                   defaultValue={companyData.name}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-3 py-2 bg-muted border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                     Tax ID / EIN
                   </label>
                   <input
                     type="text"
                     defaultValue={companyData.taxId}
                     disabled
-                    className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed"
+                    className="w-full px-3 py-2 bg-muted border rounded-lg text-sm text-muted-foreground cursor-not-allowed"
                   />
+                  
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                     Website
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                       <Globe className="h-4 w-4" />
                     </span>
                     <input
                       type="text"
                       defaultValue={companyData.website}
-                      className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                      className="w-full pl-9 pr-3 py-2 bg-muted border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                     Phone Number
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                       <Phone className="h-4 w-4" />
                     </span>
                     <input
                       type="text"
                       defaultValue={companyData.phone}
-                      className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                      className="w-full pl-9 pr-3 py-2 bg-muted border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                     Email Address
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                       <Mail className="h-4 w-4" />
                     </span>
                     <input
                       type="email"
                       defaultValue={companyData.email}
-                      className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                      className="w-full pl-9 pr-3 py-2 bg-muted border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   HQ Address
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
                   </span>
                   <input
                     type="text"
                     defaultValue={companyData.address}
-                    className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full pl-9 pr-3 py-2 bg-muted border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </div>
@@ -147,7 +148,7 @@ export default function CompanyPage() {
                 <button
                   type="button"
                   onClick={() => alert("Demo Mode: Changes cannot be saved.")}
-                  className="w-full sm:w-auto px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg text-sm font-medium transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors"
                 >
                   Save Changes
                 </button>
@@ -156,32 +157,32 @@ export default function CompanyPage() {
           </div>
         </div>
         <div className="space-y-6">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 md:p-6">
+          <div className="bg-card border rounded-xl shadow-sm p-5 md:p-6">
             <div className="flex items-center gap-2 mb-4 border-b pb-3">
-              <CreditCard className="h-5 w-5 text-gray-500" />
+              <CreditCard className="h-5 w-5 text-muted-foreground" />
               <h2 className="text-lg font-semibold">Subscription</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <span className="text-xs font-medium text-gray-400 uppercase tracking-wider block">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
                   Current Plan
                 </span>
                 <span className="text-xl font-bold block mt-0.5">{companyData.plan.name}</span>
               </div>
-              <div className="flex justify-between items-end border-b border-gray-100 pb-3">
+              <div className="flex justify-between items-end border-b pb-3">
                 <div>
-                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider block">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
                     Pricing
                   </span>
-                  <span className="text-lg font-semibold text-gray-700 mt-0.5">
+                  <span className="text-lg font-semibold text-foreground mt-0.5">
                     {companyData.plan.price}
                   </span>
                 </div>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mb-1">
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded mb-1">
                   {companyData.plan.billingCycle}
                 </span>
               </div>
-              <div className="space-y-2 text-sm text-gray-600">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 {companyData.plan.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-green-600 dark:text-green-400 dark:text-green-400. shrink-0" />
@@ -189,35 +190,35 @@ export default function CompanyPage() {
                   </div>
                 ))}
               </div>
-              <div className="pt-2 border-t border-gray-100 text-xs text-gray-500 flex justify-between">
+              <div className="pt-2 border-t text-xs text-muted-foreground flex justify-between">
                 <span>Next invoice date:</span>
-                <span className="font-medium text-gray-700">{companyData.plan.nextPayment}</span>
+                <span className="font-medium text-foreground">{companyData.plan.nextPayment}</span>
               </div>
               <button
                 onClick={() => alert("Demo Mode: Upgrade restricted.")}
-                className="w-full py-2  border border-primary text-primary hover:bg-muted rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                className="w-full py-2  border border-primary text-primary hover:bg-muted rounded-lg text-sm font-medium transition-colors"
               >
                 Upgrade Plan
               </button>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 md:p-6">
+          <div className="bg-card border rounded-xl shadow-sm p-5 md:p-6">
             <div className="flex items-center gap-2 mb-4 border-b pb-3">
-              <Calendar className="h-5 w-5 text-gray-500" />
+              <Calendar className="h-5 w-5 text-muted-foreground" />
               <h2 className="text-lg font-semibold">System Details</h2>
             </div>
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between py-1 border-b border-gray-50">
-                <span className="text-gray-400 uppercase tracking-wider">Created At</span>
-                <span className="font-medium text-gray-700">{companyData.createdAt}</span>
+              <div className="flex justify-between py-1 border-b border-border/50">
+                <span className="text-muted-foreground uppercase tracking-wider">Created At</span>
+                <span className="font-medium text-foreground">{companyData.createdAt}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-gray-50">
-                <span className="text-gray-400 uppercase tracking-wider">Organization ID</span>
-                <span className="font-mono bg-gray-50 px-1.5 py-0.5 rounded text-gray-600">org_tm450x12</span>
+              <div className="flex justify-between py-1 border-b border-border/50">
+                <span className="text-muted-foreground uppercase tracking-wider">Organization ID</span>
+                <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">org_tm450x12</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-gray-400 uppercase tracking-wider">Region</span>
-                <span className="font-medium text-gray-700">US-East (N. Virginia)</span>
+                <span className="text-muted-foreground uppercase tracking-wider">Region</span>
+                <span className="font-medium text-foreground">US-East (N. Virginia)</span>
               </div>
             </div>
           </div>

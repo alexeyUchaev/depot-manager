@@ -93,7 +93,7 @@ export default function UsersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <tr className="bg-muted border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <th className="px-6 py-4">Name / Email</th>
                 <th className="px-6 py-4 hidden lg:table-cell">Role</th>
                 <th className="px-6 py-4 hidden xl:table-cell">Department</th>
