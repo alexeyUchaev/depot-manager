@@ -63,33 +63,39 @@ export async function POST(req: Request) {
           },
         });
 
-        const result = await chat.sendMessage({ message: userMessage });
+        let response = await chat.sendMessage({ message: userMessage });
 
-        const call = result.functionCalls?.[0];
+        const MAX_STEPS = 8;                            
 
-        if (call?.name) {
-          console.log("🔧 tool call:", call.name);
-          send("tool_call", { tool: call.name, args: call.args });
+        for (let step = 0; step < MAX_STEPS; step++) {
+          const calls = response.functionCalls ?? [];  
+          if (calls.length === 0) {                     
+            send("text", response.text ?? "");
+            break;
+          }
 
-          const toolResult = await executeTool(call.name, call.args);
+          // (4) выполняем ВСЕ запрошенные инструменты этого хода
+          const functionResponses = [];
+          for (const call of calls) {
+            if (!call.name) continue;
+            send("tool_call", { tool: call.name, args: call.args });
 
-          revalidatePath("/inventory");
+            let result;
+            try {
+              result = await executeTool(call.name, call.args);
+            } catch (e) {                                
+              result = { error: e instanceof Error ? e.message : "tool failed" };
+            }
+
+            functionResponses.push({
+              functionResponse: { name: call.name, response: { result } },
+            });
+          }
+
+          revalidatePath("/inventory");               
           revalidatePath("/orders");
 
-          const finalResult = await chat.sendMessage({
-            message: [
-              {
-                functionResponse: {
-                  name: call.name,
-                  response: { result: toolResult },
-                },
-              },
-            ],
-          });
-
-          send("text", finalResult.text ?? "");
-        } else {
-          send("text", result.text ?? "");
+          response = await chat.sendMessage({ message: functionResponses });
         }
       } catch (error: unknown) {
         console.error("=== BACKEND CRITICAL ERROR ===", error);

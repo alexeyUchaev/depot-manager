@@ -1,7 +1,8 @@
 import * as services from "@/services";
-import { DEMO_TENANT_ID } from "./constants";
+import { DEMO_TENANT_ID, DEMO_USER_ID } from "./constants";
 export async function executeTool(name: string, args: any) {
   const tenantId = DEMO_TENANT_ID;
+  const userId = DEMO_USER_ID
 
   switch (name) {
     case "getAllProductsByTenant":
@@ -19,6 +20,9 @@ export async function executeTool(name: string, args: any) {
       });
       case "getAllByTenant":
         return await services.orderService.getAllByTenant(tenantId)
+      
+        case "createOrder":
+        return await services.orderService.create(tenantId, userId, args.products)
     default:
       throw new Error(`Tool ${name} is not implemented.`);
   }
