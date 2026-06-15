@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { depotTools } from "@/lib/ai-tools";
 import { executeTool } from "@/lib/ai-executor";
 
-export const runtime = "nodejs"; // нужен node-рантайм для executeTool/revalidatePath
+export const runtime = "nodejs";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 

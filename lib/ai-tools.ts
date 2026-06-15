@@ -27,4 +27,8 @@ export const depotTools: FunctionDeclaration[] = [
       required: ["name", "sku", "price"],
     },
   },
+  {
+    name: "getAllByTenant",
+    description: "Get all order by tenant"
+  }
 ];

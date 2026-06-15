@@ -17,7 +17,8 @@ export async function executeTool(name: string, args: any) {
         quantity: args.quantity || 0,
         lowStockAt: args.lowStockAt || 10
       });
-
+      case "getAllByTenant":
+        return await services.orderService.getAllByTenant(tenantId)
     default:
       throw new Error(`Tool ${name} is not implemented.`);
   }
