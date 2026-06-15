@@ -33,10 +33,10 @@ export const depotTools: FunctionDeclaration[] = [
   },
   {
    name:"createOrder",
-   description: "Create new order",
-   
+   description: "Create new order",   
    parameters: {
     type: Type.OBJECT,
+    description: "Use tool: getAllProductsByTenant to find product and make sure there is enough items to proceed",
     properties:{
       products: { 
         type: Type.ARRAY,
@@ -45,7 +45,7 @@ export const depotTools: FunctionDeclaration[] = [
           properties:{
             productName: {type: Type.STRING, description: "Product name"},
             quantity: { type: Type.STRING, description: "quantity"}
-          },   required: ["productName", ],
+          },   required: ["productName", "quantity"],
         },
       }
     }
