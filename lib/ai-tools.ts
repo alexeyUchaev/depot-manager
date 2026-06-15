@@ -32,23 +32,28 @@ export const depotTools: FunctionDeclaration[] = [
     description: "Get all order by tenant"
   },
   {
-   name:"createOrder",
-   description: "Create new order",   
-   parameters: {
-    type: Type.OBJECT,
-    description: "Use tool: getAllProductsByTenant to find product and make sure there is enough items to proceed",
-    properties:{
-      products: { 
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties:{
-            productName: {type: Type.STRING, description: "Product name"},
-            quantity: { type: Type.STRING, description: "quantity"}
-          },   required: ["productName", "quantity"],
+    name: "createOrder",
+    description:
+      "Создать заказ. ВАЖНО: сначала вызови getAllProductsByTenant, найди товары " +
+      "по названию, возьми их точные id и проверь, что остатка хватает. " +
+      "В createOrder передавай productId (НЕ название). Никогда не выдумывай productId.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        customerName: { type: Type.STRING, description: "Имя клиента / заказчика" },
+        products: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              productId: { type: Type.STRING, description: "ID товара из getAllProductsByTenant" },
+              quantity:  { type: Type.NUMBER, description: "Количество" },
+            },
+            required: ["productId", "quantity"],
+          },
         },
-      }
-    }
-   }
-  }
+      },
+      required: ["customerName", "products"],
+    },
+  },
 ];
