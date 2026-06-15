@@ -45,9 +45,8 @@ export const depotTools: FunctionDeclaration[] = [
           properties:{
             productName: {type: Type.STRING, description: "Product name"},
             quantity: { type: Type.STRING, description: "quantity"}
-          }
+          },   required: ["productName", ],
         },
-        required: ["productName", ],
       }
     }
    }
