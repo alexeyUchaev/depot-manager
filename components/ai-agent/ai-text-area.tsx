@@ -1,4 +1,3 @@
-// ai-text-area.tsx
 "use client";
 import { FaAngleDoubleRight } from "react-icons/fa";
 
@@ -11,21 +10,30 @@ export default function AiTextArea({
   disabled?: boolean;
 }) {
   return (
-    <div className="py-2.5 px-2 text-[#423737] border-t border-[#00000024]">
-      <div className="relative p-0.5 border rounded-xs border-[#00000024] w-full h-[100px]">
+    <div className="p-3 border-t border-sidebar-border">
+      {/* dashboard-style rounded input */}
+      <div className="relative bg-card border border-gray-200 rounded-xl shadow-sm w-full h-[100px] focus-within:ring-2 focus-within:ring-ring focus-within:border-transparent transition">
         <textarea
-          className="h-full w-full align-top resize-none outline-none pr-8 pt-1 pl-2 disabled:opacity-60"
+          className="h-full w-full align-top resize-none outline-none bg-transparent text-sm 	text-foreground placeholder:text-muted-foreground px-3 py-2 pr-10 disabled:opacity-60"
           placeholder="Type a message..."
           value={value}
           onChange={onChange}
           disabled={disabled}
-          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              onSend();
+            }
+          }}
         />
-        <div className="absolute right-2 bottom-2 rounded-sm text-[#423737] opacity-80 hover:opacity-100 transition-opacity bg-[#b8b8b833]">
-          <button onClick={onSend} disabled={disabled} className="p-1 flex justify-around disabled:opacity-40 disabled:cursor-not-allowed">
-            <FaAngleDoubleRight />
-          </button>
-        </div>
+        <button
+          onClick={onSend}
+          disabled={disabled}
+          className="absolute right-2 bottom-2 p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          aria-label="Send"
+        >
+          <FaAngleDoubleRight className="h-3 w-3" />
+        </button>
       </div>
     </div>
   );

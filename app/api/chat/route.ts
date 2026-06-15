@@ -17,7 +17,15 @@ Your job is to help users manage their inventory efficiently, keeping a welcomin
 5. **Low Stock Alerts:** Be proactive! If you notice that any product's current quantity is less than or equal to its lowStockAt threshold, warmly warn the user about the low stock so they can reorder in time.
 ### Tone Guidelines:
 * Be conversational and clear. Instead of dry robotic answers, use phrases like "I'd be happy to check that for you!" or "All set! I've successfully added that to the system."
-* Keep track of the context to guide the user smoothly through warehouse operations..`;
+* Keep track of the context to guide the user smoothly through warehouse operations..
+### Создание заказов:
+Когда юзер называет товары для заказа (даже неточно или с опечатками):
+1. СРАЗУ вызови getAllProductsByTenant — не спрашивай разрешения, делай это сам.
+2. Сопоставь слова юзера с товарами по бренду/типу, игнорируй мусорные слова. Пример: "монитор самсунг" → "Samsung 27\" 4K Monitor".
+3. При ОДНОЗНАЧНОМ совпадении используй товар сразу, НЕ переспрашивай.
+4. Переспрашивай ТОЛЬКО если товар не найден или совпадает несколько вариантов (например два "Модный ноутбук").
+5. Затем сразу вызови createOrder, передавая productId (НЕ название) и quantity.
+Если имя клиента (customerName) не названо — спроси его один раз, затем создавай заказ.`;
 
 export async function POST(req: Request) {
 
@@ -63,33 +71,50 @@ export async function POST(req: Request) {
           },
         });
 
-        const result = await chat.sendMessage({ message: userMessage });
+        let response = await chat.sendMessage({ message: userMessage });
 
-        const call = result.functionCalls?.[0];
+        const MAX_STEPS = 5;
+        for (let step = 0; step < MAX_STEPS; step++) {
+          const calls = response.functionCalls ?? [];
 
-        if (call?.name) {
-          console.log("🔧 tool call:", call.name);
-          send("tool_call", { tool: call.name, args: call.args });
+          // Модель больше не просит инструментов → это финальный ответ
+          if (calls.length === 0) {
+            send("text", response.text ?? "");
+            break;
+          }
 
-          const toolResult = await executeTool(call.name, call.args);
+          // Выполняем все запрошенные на этом ходу инструменты
+          const functionResponses = [];
+          for (const call of calls) {
+            if (!call.name) continue;
+            console.log("🔧 tool call:", call.name);
+            send("tool_call", { tool: call.name, args: call.args });
+
+            let toolResult: unknown;
+            try {
+              toolResult = await executeTool(call.name, call.args);
+            } catch (e) {
+              // Ошибку инструмента возвращаем модели, а не роняем стрим
+              toolResult = { error: e instanceof Error ? e.message : "tool failed" };
+            }
+
+            functionResponses.push({
+              functionResponse: {
+                name: call.name,
+                response: { result: toolResult },
+              },
+            });
+          }
 
           revalidatePath("/inventory");
           revalidatePath("/orders");
 
-          const finalResult = await chat.sendMessage({
-            message: [
-              {
-                functionResponse: {
-                  name: call.name,
-                  response: { result: toolResult },
-                },
-              },
-            ],
-          });
+          // Возвращаем результаты модели и идём на следующий виток
+          response = await chat.sendMessage({ message: functionResponses });
 
-          send("text", finalResult.text ?? "");
-        } else {
-          send("text", result.text ?? "");
+          if (step === MAX_STEPS - 1) {
+            send("text", "Не смог завершить за отведённые шаги, уточни запрос, пожалуйста.");
+          }
         }
       } catch (error: unknown) {
         console.error("=== BACKEND CRITICAL ERROR ===", error);

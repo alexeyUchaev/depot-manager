@@ -27,4 +27,34 @@ export const depotTools: FunctionDeclaration[] = [
       required: ["name", "sku", "price"],
     },
   },
+  {
+    name: "getAllByTenant",
+    description: "Получить список всех заказов тенанта (номер, клиент, статус, позиции, сумма).",
+  },
+  {
+    name: "createOrder",
+    description:
+      "Создать новый заказ. ВАЖНО: сначала вызови getAllProductsByTenant, найди товары " +
+      "по названию, возьми их точные id и убедись, что остатка хватает. В createOrder " +
+      "передавай productId (НЕ название товара). Никогда не выдумывай productId.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        customerName: { type: Type.STRING, description: "Имя клиента / заказчика" },
+        products: {
+          type: Type.ARRAY,
+          description: "Позиции заказа",
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              productId: { type: Type.STRING, description: "ID товара из getAllProductsByTenant" },
+              quantity: { type: Type.NUMBER, description: "Количество" },
+            },
+            required: ["productId", "quantity"],
+          },
+        },
+      },
+      required: ["customerName", "products"],
+    },
+  },
 ];
