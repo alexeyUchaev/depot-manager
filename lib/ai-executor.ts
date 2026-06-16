@@ -30,7 +30,8 @@ export async function executeTool(name: string, args: any) {
           return { error: `Товар не найден: ${p.sku}` };
         }
         items.push({
-          id: p.id,
+          id: product.id,
+          sku: product.sku,
           quantity: Number(p.quantity),
           price: product.price,
         });
