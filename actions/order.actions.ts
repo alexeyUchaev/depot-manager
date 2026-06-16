@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache'
 import { orderService } from '@/services/order.service'
 import type { ActionResult } from '@/types/user.types'
 import type { OrderDTO } from '@/services/order.service'
+import { DEMO_TENANT_ID, DEMO_USER_ID } from '@/lib/constants'
 
-const DEMO_TENANT_ID = 'cmpk3vjwi00007g5dkg1dpryy'
-const DEMO_USER_ID = 'cmpk3vk9p00017g5d5sucwz3r'
+
 
 export async function getOrders(): Promise<ActionResult<OrderDTO[]>> {
   try {

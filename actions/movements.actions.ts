@@ -5,9 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { movementService } from '@/services/movements.service'
 import type { ActionResult } from '@/types/user.types'
 import type { MovementDTO } from '@/services/movements.service'
+import { DEMO_TENANT_ID, DEMO_USER_ID } from '@/lib/constants'
 
-const DEMO_TENANT_ID = 'cmpk3vjwi00007g5dkg1dpryy'
-const DEMO_USER_ID = 'cmpk3vk9p00017g5d5sucwz3r'
 
 export async function getMovements(): Promise<ActionResult<MovementDTO[]>> {
   try {
@@ -21,7 +20,7 @@ export async function getMovements(): Promise<ActionResult<MovementDTO[]>> {
 
 export async function createMovement(data: {
   productId: string
-  type: 'IN' | 'OUT' | 'ADJUSTMENT'
+  type: 'IN' | 'OUT'
   quantity: number
   reason?: string
 }): Promise<ActionResult<MovementDTO>> {

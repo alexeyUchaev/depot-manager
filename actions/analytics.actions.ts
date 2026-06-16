@@ -1,10 +1,9 @@
 'use server'
 
+import { DEMO_TENANT_ID } from '@/lib/constants'
 import { analyticsService } from '@/services/analytics.service'
 import type { AnalyticsData } from '@/services/analytics.service'
 import type { ActionResult } from '@/types/user.types'
-
-const DEMO_TENANT_ID = 'cmpk3vjwi00007g5dkg1dpryy'
 
 export async function getAnalytics(): Promise<ActionResult<AnalyticsData>> {
   try {

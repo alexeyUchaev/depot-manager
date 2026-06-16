@@ -1,2 +1,2 @@
-export const DEMO_TENANT_ID = 'cmpk3vjwi00007g5dkg1dpryy'
-export const DEMO_USER_ID = 'cmpk3vk9p00017g5d5sucwz3r'
+export const DEMO_TENANT_ID = 'cmqh9ifcy0000zm5dydzxn4dq'
+export const DEMO_USER_ID = 'cmqh9ifcy0000zm5dydzxn4dq'

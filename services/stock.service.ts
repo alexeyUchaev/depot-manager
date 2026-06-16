@@ -12,8 +12,8 @@ import { prisma } from '@/lib/prisma'
 
 type PostMovementInput = {
   productId: string
-  type: 'IN' | 'OUT' | 'ADJUSTMENT'
-  /** Signed effect on stock: IN => +q, OUT => -q, ADJUSTMENT => delta to target. */
+  type: 'IN' | 'OUT'
+  /** Signed effect on stock: IN => +q, OUT => -q. */
   signedQuantity: number
   reason?: string
   orderId?: string

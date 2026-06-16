@@ -252,11 +252,11 @@ async function main() {
     }),
   ])
 
-  // A cycle-count correction (ADJUSTMENT stores a signed delta to reach the counted value).
+  // A cycle-count correction is itself a document: a write-off => OUT movement.
   await prisma.stockMovement.create({
-    data: { orgId: tenant.id, productId: products[3].id, userId: owner.id, type: 'ADJUSTMENT', quantity: -1, reason: 'Cycle Count Audit' },
+    data: { orgId: tenant.id, productId: products[3].id, userId: owner.id, type: 'OUT', quantity: -1, reason: 'Cycle Count Correction (write-off)' },
   })
-  console.log('✅ Stock movements (OUT / ADJUSTMENT) created')
+  console.log('✅ Stock movements (OUT) created')
 
   // Rebuild the cachedQuantity projection from the ledger (single source of truth).
   const sums = await prisma.stockMovement.groupBy({
