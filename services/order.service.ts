@@ -77,7 +77,7 @@ export const orderService = {
       const order = await prisma.$transaction(async (tx) => {
         for (const item of data.items) {
           const product = await tx.product.findFirst({
-            where: { sku: item.productId, orgId: tenantId },
+            where: { sku: item.sku, orgId: tenantId },
           })
           if (!product) throw new Error(`Product not found`)
           if (product.quantity < item.quantity) {
@@ -95,7 +95,7 @@ export const orderService = {
             status: 'PENDING',
             items: {
               create: data.items.map((item) => ({
-                productId: item.productId,
+                productId: item.sku,
                 quantity: item.quantity,
                 price: item.price,
               })),
