@@ -22,20 +22,31 @@ const toDTO = (product: {
   sku: string
   category: string | null
   location: string | null
-  quantity: number
+  cachedQuantity: number
   price: Prisma.Decimal
   lowStockAt: number
   createdAt: Date
-}): ProductDTO => ({
-  ...product,
-  price: Number(product.price),
-  status:
-    product.quantity === 0
-      ? 'Out of Stock'
-      : product.quantity <= product.lowStockAt
-      ? 'Low Stock'
-      : 'In Stock',
-})
+}): ProductDTO => {
+  // quantity exposed to the app = the cached projection of the ledger.
+  const quantity = product.cachedQuantity
+  return {
+    id: product.id,
+    name: product.name,
+    sku: product.sku,
+    category: product.category,
+    location: product.location,
+    quantity,
+    price: Number(product.price),
+    lowStockAt: product.lowStockAt,
+    status:
+      quantity === 0
+        ? 'Out of Stock'
+        : quantity <= product.lowStockAt
+        ? 'Low Stock'
+        : 'In Stock',
+    createdAt: product.createdAt,
+  }
+}
 
 
 export const getAllProductsByTenant = async (tenantId: string): Promise<ProductDTO[]> => {
@@ -48,7 +59,7 @@ export const getAllProductsByTenant = async (tenantId: string): Promise<ProductD
         sku: true,
         category: true,
         location: true,
-        quantity: true,
+        cachedQuantity: true,
         price: true,
         lowStockAt: true,
         createdAt: true,
@@ -67,7 +78,7 @@ export const  getBySku = async (sku: string, tenantId: string): Promise<ProductD
         sku: true,
         category: true,
         location: true,
-        quantity: true,
+        cachedQuantity: true,
         price: true,
         lowStockAt: true,
         createdAt: true,
@@ -81,7 +92,7 @@ export const  getLowStock = async (tenantId: string): Promise<ProductDTO[]> => {
     const products = await prisma.product.findMany({
       where: {
         orgId: tenantId,
-        quantity: { lte: prisma.product.fields.lowStockAt },
+        cachedQuantity: { lte: prisma.product.fields.lowStockAt },
       },
       select: {
         id: true,
@@ -89,7 +100,7 @@ export const  getLowStock = async (tenantId: string): Promise<ProductDTO[]> => {
         sku: true,
         category: true,
         location: true,
-        quantity: true,
+        cachedQuantity: true,
         price: true,
         lowStockAt: true,
         createdAt: true,
@@ -107,7 +118,6 @@ export const  createProduct = async(
       category?: string
       location?: string
       price: number
-      quantity?: number
       lowStockAt?: number
     }
   ): Promise<ActionResult<ProductDTO>> => {
@@ -127,7 +137,6 @@ export const  createProduct = async(
           category: data.category,
           location: data.location,
           price: data.price,
-          quantity: data.quantity ?? 0,
           lowStockAt: data.lowStockAt ?? 10,
         },
         select: {
@@ -136,7 +145,7 @@ export const  createProduct = async(
           sku: true,
           category: true,
           location: true,
-          quantity: true,
+          cachedQuantity: true,
           price: true,
           lowStockAt: true,
           createdAt: true,
@@ -176,7 +185,7 @@ export const  updateProduct = async (
           sku: true,
           category: true,
           location: true,
-          quantity: true,
+          cachedQuantity: true,
           price: true,
           lowStockAt: true,
           createdAt: true,

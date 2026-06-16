@@ -65,8 +65,8 @@ function MovementDetailModal({ movement, onClose }: { movement: MovementDTO; onC
     {
       label: 'Quantity',
       value: (
-        <span className={`font-bold ${movement.type === 'IN' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-          {movement.type === 'IN' ? '+' : '-'}{movement.quantity}
+        <span className={`font-bold ${movement.quantity >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          {movement.quantity >= 0 ? '+' : '-'}{Math.abs(movement.quantity)}
         </span>
       ),
     },
@@ -162,8 +162,8 @@ export default function MovementsClient({ movements }: { movements: MovementDTO[
                 </span>
               </div>
             </div>
-            <div className={`font-bold text-sm whitespace-nowrap shrink-0 ${mov.type === 'IN' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-              {mov.type === 'IN' ? '+' : '-'}{mov.quantity}
+            <div className={`font-bold text-sm whitespace-nowrap shrink-0 ${mov.quantity >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {mov.quantity >= 0 ? '+' : '-'}{Math.abs(mov.quantity)}
             </div>
           </button>
         ))}
@@ -203,8 +203,8 @@ export default function MovementsClient({ movements }: { movements: MovementDTO[
                     <TypeBadge type={mov.type} />
                   </td>
                   <td className="px-6 py-4 hidden 2xl:table-cell">
-                    <span className={`font-bold text-sm ${mov.type === 'IN' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {mov.type === 'IN' ? '+' : '-'}{mov.quantity}
+                    <span className={`font-bold text-sm ${mov.quantity >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {mov.quantity >= 0 ? '+' : '-'}{Math.abs(mov.quantity)}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-xs text-muted-foreground hidden 2xl:table-cell">
