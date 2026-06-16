@@ -24,7 +24,6 @@ export const dashboardService = {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    // Продажи за сегодня
     const todayOrders = await prisma.order.findMany({
       where: {
         orgId: tenantId,

@@ -57,4 +57,7 @@ export const depotTools: FunctionDeclaration[] = [
       required: ["customerName", "products"],
     },
   },
+  {
+    name
+  },
 ];
