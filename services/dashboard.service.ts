@@ -68,7 +68,7 @@ export const dashboardService = {
     const lowStockProducts = await prisma.product.findMany({
       where: {
         orgId: tenantId,
-        quantity: { lte: 5 },
+        cachedQuantity: { lte: prisma.product.fields.lowStockAt },
       },
       take: 2,
     })
@@ -87,14 +87,14 @@ export const dashboardService = {
       ...recentMovements.map((mov) => ({
         id: mov.id,
         type: 'movement' as const,
-        text: `${mov.product.name} ${mov.type === 'IN' ? 'received' : 'dispatched'} — ${mov.type === 'IN' ? '+' : '-'}${mov.quantity} units`,
+        text: `${mov.product.name} ${mov.type === 'IN' ? 'received' : 'dispatched'} — ${mov.quantity >= 0 ? '+' : '-'}${Math.abs(mov.quantity)} units`,
         time: mov.createdAt,
         amount: null,
       })),
       ...lowStockProducts.map((product) => ({
         id: product.id,
         type: 'alert' as const,
-        text: `Low Stock Alert: ${product.name} — only ${product.quantity} units remaining`,
+        text: `Low Stock Alert: ${product.name} — only ${product.cachedQuantity} units remaining`,
         time: product.createdAt,
         amount: null,
       })),

@@ -16,7 +16,6 @@ export async function executeTool(name: string, args: any) {
         category: args.category,
         location: args.location,
         price: args.price,
-        quantity: args.quantity || 0,
         lowStockAt: args.lowStockAt || 10
       });
 

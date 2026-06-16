@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import type { ActionResult } from '@/types/user.types'
+import { postMovement } from './stock.service'
 
 export type MovementDTO = {
   id: string
@@ -60,35 +61,31 @@ export const movementService = {
       })
       if (!product) return { success: false, error: 'Product not found' }
 
-      if (data.type === 'OUT' && product.quantity < data.quantity) {
-        return { success: false, error: `Not enough stock. Available: ${product.quantity}` }
+      // The ledger stores a SIGNED effect on stock.
+      // IN => +q, OUT => -q, ADJUSTMENT => set stock to the entered value N.
+      const magnitude = Math.abs(data.quantity)
+      const signedQuantity =
+        data.type === 'IN'
+          ? magnitude
+          : data.type === 'OUT'
+          ? -magnitude
+          : data.quantity - product.cachedQuantity // ADJUSTMENT: delta to reach N
+
+      if (product.cachedQuantity + signedQuantity < 0) {
+        return {
+          success: false,
+          error: `Not enough stock. Available: ${product.cachedQuantity}`,
+        }
       }
 
-      const movement = await prisma.$transaction(async (tx) => {
-        const newMovement = await tx.stockMovement.create({
-          data: {
-            orgId: tenantId,
-            productId: data.productId,
-            userId,
-            type: data.type,
-            quantity: data.quantity,
-            reason: data.reason,
-          },
-          include: {
-            product: { select: { name: true, sku: true } },
-            user: { select: { firstName: true, lastName: true } },
-          },
+      const movement = await prisma.$transaction((tx) =>
+        postMovement(tx, tenantId, userId, {
+          productId: data.productId,
+          type: data.type,
+          signedQuantity,
+          reason: data.reason,
         })
-
-        // Обновляем quantity
-        const delta = data.type === 'IN' ? data.quantity : -data.quantity
-        await tx.product.update({
-          where: { id: data.productId },
-          data: { quantity: { increment: delta } },
-        })
-
-        return newMovement
-      })
+      )
 
       return {
         success: true,

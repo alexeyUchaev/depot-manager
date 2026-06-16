@@ -32,7 +32,6 @@ export async function createProduct(data: {
   category?: string
   location?: string
   price: number
-  quantity?: number
   lowStockAt?: number
 }): Promise<ActionResult<ProductDTO>> {
   try {

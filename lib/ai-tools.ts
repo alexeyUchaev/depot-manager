@@ -12,7 +12,9 @@ export const depotTools: FunctionDeclaration[] = [
   },
   {
     name: "createProduct",
-    description: "Создать новый товар на складе. ",
+    description:
+      "Создать новую карточку товара (справочник). Остаток создаётся отдельно " +
+      "движением прихода (IN), а не здесь — новый товар стартует с остатком 0.",
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -21,7 +23,6 @@ export const depotTools: FunctionDeclaration[] = [
         category: { type: Type.STRING, description: "Категория товара" },
         location: { type: Type.STRING, description: "Место хранения на складе" },
         price: { type: Type.NUMBER, description: "Цена за единицу" },
-        quantity: { type: Type.NUMBER, description: "Начальное количество (по умолчанию 0)" },
         lowStockAt: { type: Type.NUMBER, description: "Порог низкого остатка (по умолчанию 10)" },
       },
       required: ["name", "sku", "price"],

@@ -74,7 +74,7 @@ export const analyticsService = {
     })
 
     const inventoryValuation = products.reduce(
-      (sum, p) => sum + Number(p.price) * p.quantity,
+      (sum, p) => sum + Number(p.price) * p.cachedQuantity,
       0
     )
 
@@ -135,13 +135,19 @@ export const analyticsService = {
       where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
     })
 
-    const inUnits = movements.filter(m => m.type === 'IN').reduce((s, m) => s + m.quantity, 0)
-    const outUnits = movements.filter(m => m.type === 'OUT').reduce((s, m) => s + m.quantity, 0)
+    // Ledger quantities are signed (OUT is negative) — use magnitudes here.
+    const inUnits = movements.filter(m => m.type === 'IN').reduce((s, m) => s + Math.abs(m.quantity), 0)
+    const outUnits = movements.filter(m => m.type === 'OUT').reduce((s, m) => s + Math.abs(m.quantity), 0)
 
-    const lowStockProducts = await prisma.product.findMany({
-      where: { orgId: tenantId, quantity: { lte: 5 } },
-      select: { name: true, sku: true, quantity: true },
+    const lowStock = await prisma.product.findMany({
+      where: { orgId: tenantId, cachedQuantity: { lte: prisma.product.fields.lowStockAt } },
+      select: { name: true, sku: true, cachedQuantity: true },
     })
+    const lowStockProducts = lowStock.map((p) => ({
+      name: p.name,
+      sku: p.sku,
+      quantity: p.cachedQuantity,
+    }))
 
     return {
       grossRevenue,
