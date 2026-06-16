@@ -36,7 +36,7 @@ export const depotTools: FunctionDeclaration[] = [
     description:
       "Создать заказ. ВАЖНО: сначала вызови getAllProductsByTenant, найди товары " +
       "по названию, возьми их точные id и проверь, что остатка хватает. " +
-      "В createOrder передавай productId (НЕ название). Никогда не выдумывай productId.",
+      "В createOrder передавай sku (НЕ название). Никогда не выдумывай sku.",
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -50,7 +50,7 @@ export const depotTools: FunctionDeclaration[] = [
               sku: { type: Type.STRING, description: "Sku товара из getAllProductsByTenant" },
               quantity:  { type: Type.NUMBER, description: "Количество" },
             },
-            required: ["productId", "quantity"],
+            required: ["sku", "quantity"],
           },
         },
       },
