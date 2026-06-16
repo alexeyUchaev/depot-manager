@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import type { ActionResult } from '@/types/user.types'
+import { Product } from '@prisma/client'
+import path from 'path'
 
 export type OrderDTO = {
   id: string
@@ -67,7 +69,7 @@ export const orderService = {
     userId: string,
     data: {
       customerName: string
-      items: { sku: string; quantity: number; price: number }[]
+      items: { id: string, sku: string; quantity: number; price: number }[]
     }
   ): Promise<ActionResult<OrderDTO>> {
     try {
