@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import type { ActionResult } from '@/types/user.types'
+import { postMovement } from './stock.service'
 
 export type OrderDTO = {
   id: string
@@ -67,7 +68,7 @@ export const orderService = {
     userId: string,
     data: {
       customerName: string
-      items: { productId: string; quantity: number; price: number }[]
+      items: { id: string, sku: string; quantity: number; price: number }[]
     }
   ): Promise<ActionResult<OrderDTO>> {
     try {
@@ -75,13 +76,12 @@ export const orderService = {
       const orderNumber = `ORD-${String(count + 1).padStart(4, '0')}`
 
       const order = await prisma.$transaction(async (tx) => {
-        // Проверяем остатки
         for (const item of data.items) {
           const product = await tx.product.findFirst({
-            where: { id: item.productId, orgId: tenantId },
+            where: { sku: item.sku, orgId: tenantId },
           })
           if (!product) throw new Error(`Product not found`)
-          if (product.quantity < item.quantity) {
+          if (product.cachedQuantity < item.quantity) {
             throw new Error(`Not enough stock for ${product.name}`)
           }
         }
@@ -96,7 +96,7 @@ export const orderService = {
             status: 'PENDING',
             items: {
               create: data.items.map((item) => ({
-                productId: item.productId,
+                productId: item.id,
                 quantity: item.quantity,
                 price: item.price,
               })),
@@ -111,6 +111,18 @@ export const orderService = {
             user: { select: { firstName: true, lastName: true } },
           },
         })
+
+        // Each order line dispatches stock => an OUT movement in the ledger
+        // (the single source of truth), which also updates the cached stock.
+        for (const item of data.items) {
+          await postMovement(tx, tenantId, userId, {
+            productId: item.id,
+            type: 'OUT',
+            signedQuantity: -item.quantity,
+            reason: `Order ${newOrder.orderNumber}`,
+            orderId: newOrder.id,
+          })
+        }
 
         return newOrder
       })

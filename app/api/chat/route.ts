@@ -17,6 +17,7 @@ Your job is to help users manage their inventory efficiently, keeping a welcomin
 5. **Low Stock Alerts:** Be proactive! If you notice that any product's current quantity is less than or equal to its lowStockAt threshold, warmly warn the user about the low stock so they can reorder in time.
 ### Tone Guidelines:
 * Be conversational and clear. Instead of dry robotic answers, use phrases like "I'd be happy to check that for you!" or "All set! I've successfully added that to the system."
+
 * Keep track of the context to guide the user smoothly through warehouse operations..
 ### Создание заказов:
 Когда юзер называет товары для заказа (даже неточно или с опечатками):
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
         }
 
         const chat = ai.chats.create({
-          model: "gemini-2.5-flash-lite",
+          model: "gemini-2.5-flash",
           history,
           config: {
             systemInstruction: SYSTEM_INSTRUCTION,

@@ -24,7 +24,6 @@ export const dashboardService = {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    // Продажи за сегодня
     const todayOrders = await prisma.order.findMany({
       where: {
         orgId: tenantId,
@@ -40,22 +39,18 @@ export const dashboardService = {
       0
     )
 
-    // Всего товаров
     const totalProducts = await prisma.product.count({
       where: { orgId: tenantId },
     })
 
-    // Ожидающие заказы
     const pendingOrders = await prisma.order.count({
       where: { orgId: tenantId, status: 'PENDING' },
     })
 
-    // Движения за сегодня
     const todayMovements = await prisma.stockMovement.count({
       where: { orgId: tenantId, createdAt: { gte: today } },
     })
 
-    // Последние активности
     const recentOrders = await prisma.order.findMany({
       where: { orgId: tenantId },
       orderBy: { createdAt: 'desc' },
@@ -73,7 +68,7 @@ export const dashboardService = {
     const lowStockProducts = await prisma.product.findMany({
       where: {
         orgId: tenantId,
-        quantity: { lte: 5 },
+        cachedQuantity: { lte: prisma.product.fields.lowStockAt },
       },
       take: 2,
     })
@@ -92,14 +87,14 @@ export const dashboardService = {
       ...recentMovements.map((mov) => ({
         id: mov.id,
         type: 'movement' as const,
-        text: `${mov.product.name} ${mov.type === 'IN' ? 'received' : 'dispatched'} — ${mov.type === 'IN' ? '+' : '-'}${mov.quantity} units`,
+        text: `${mov.product.name} ${mov.type === 'IN' ? 'received' : 'dispatched'} — ${mov.quantity >= 0 ? '+' : '-'}${Math.abs(mov.quantity)} units`,
         time: mov.createdAt,
         amount: null,
       })),
       ...lowStockProducts.map((product) => ({
         id: product.id,
         type: 'alert' as const,
-        text: `Low Stock Alert: ${product.name} — only ${product.quantity} units remaining`,
+        text: `Low Stock Alert: ${product.name} — only ${product.cachedQuantity} units remaining`,
         time: product.createdAt,
         amount: null,
       })),

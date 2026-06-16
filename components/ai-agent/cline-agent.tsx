@@ -88,7 +88,7 @@ export function ClineAgent() {
           if (data.type === 'text') {
             updateLastMessage((t) => t + data.content);
           } else if (data.type === 'tool_call') {
-            updateLastMessage(() => `⚙️ I'm gonna use ${data.content.tool}...`);
+          updateLastMessage(() => `⚙️ Using ${data.content.tool || 'a tool'}... `);
           } else if (data.type === 'error') {
             updateLastMessage(() => `${data.content}`);
           }

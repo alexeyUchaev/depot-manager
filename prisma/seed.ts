@@ -70,7 +70,7 @@ async function main() {
     },
   })
 
-  const staff2 = await prisma.user.create({
+  await prisma.user.create({
     data: {
       clerkId: 'demo_user_staff2',
       tenantId: tenant.id,
@@ -84,7 +84,8 @@ async function main() {
   })
   console.log('✅ Users created')
 
-  // Products
+  // Products — pure master data (no stock here). cachedQuantity starts at 0
+  // and is rebuilt from the StockMovement ledger by reconcile() at the end.
   const products = await Promise.all([
     prisma.product.create({
       data: {
@@ -93,8 +94,7 @@ async function main() {
         sku: 'SKU-9021',
         category: 'Electronics',
         location: 'A4 / Shelf B-2',
-        quantity: 24,
-        price: 1299.00,
+        price: 1299.0,
         lowStockAt: 5,
       },
     }),
@@ -105,8 +105,7 @@ async function main() {
         sku: 'SKU-8843',
         category: 'Electronics',
         location: 'A12 / Floor A',
-        quantity: 12,
-        price: 450.00,
+        price: 450.0,
         lowStockAt: 5,
       },
     }),
@@ -117,8 +116,7 @@ async function main() {
         sku: 'SKU-7612',
         category: 'Mobile',
         location: 'B2 / Level 3',
-        quantity: 8,
-        price: 999.00,
+        price: 999.0,
         lowStockAt: 5,
       },
     }),
@@ -129,8 +127,7 @@ async function main() {
         sku: 'SKU-6549',
         category: 'Accessories',
         location: 'C14 / Bin D',
-        quantity: 3,
-        price: 110.00,
+        price: 110.0,
         lowStockAt: 5,
       },
     }),
@@ -141,70 +138,36 @@ async function main() {
         sku: 'SKU-5421',
         category: 'Audio',
         location: 'B8 / Level 1',
-        quantity: 0,
-        price: 350.00,
+        price: 350.0,
         lowStockAt: 5,
       },
     }),
   ])
   console.log('✅ Products created')
 
-  // Stock Movements
+  // Opening stock — every unit of stock enters via an IN movement (goods receipt).
+  // Ledger quantities are SIGNED: IN => positive.
   await Promise.all([
     prisma.stockMovement.create({
-      data: {
-        orgId: tenant.id,
-        productId: products[0].id,
-        userId: manager1.id,
-        type: 'IN',
-        quantity: 24,
-        reason: 'Purchase Order #PO-2026-089',
-      },
+      data: { orgId: tenant.id, productId: products[0].id, userId: manager1.id, type: 'IN', quantity: 32, reason: 'Opening stock — PO-2026-089' },
     }),
     prisma.stockMovement.create({
-      data: {
-        orgId: tenant.id,
-        productId: products[2].id,
-        userId: manager2.id,
-        type: 'OUT',
-        quantity: 10,
-        reason: 'Order #ORD-1021',
-      },
+      data: { orgId: tenant.id, productId: products[1].id, userId: manager1.id, type: 'IN', quantity: 40, reason: 'Opening stock' },
     }),
     prisma.stockMovement.create({
-      data: {
-        orgId: tenant.id,
-        productId: products[1].id,
-        userId: staff1.id,
-        type: 'OUT',
-        quantity: 8,
-        reason: 'Order #ORD-1020',
-      },
+      data: { orgId: tenant.id, productId: products[2].id, userId: manager2.id, type: 'IN', quantity: 18, reason: 'Opening stock' },
     }),
     prisma.stockMovement.create({
-      data: {
-        orgId: tenant.id,
-        productId: products[3].id,
-        userId: owner.id,
-        type: 'ADJUSTMENT',
-        quantity: 2,
-        reason: 'Cycle Count Audit',
-      },
+      data: { orgId: tenant.id, productId: products[3].id, userId: owner.id, type: 'IN', quantity: 6, reason: 'Opening stock' },
     }),
     prisma.stockMovement.create({
-      data: {
-        orgId: tenant.id,
-        productId: products[4].id,
-        userId: manager1.id,
-        type: 'IN',
-        quantity: 15,
-        reason: 'Purchase Order #PO-2026-081',
-      },
+      data: { orgId: tenant.id, productId: products[4].id, userId: manager1.id, type: 'IN', quantity: 15, reason: 'Opening stock — PO-2026-081' },
     }),
   ])
-  console.log('✅ Stock Movements created')
+  console.log('✅ Opening stock (IN) created')
 
-  // Orders
+  // Orders — each is a document. Its lines dispatch stock via OUT movements
+  // (negative, linked back to the order through orderId).
   const order1 = await prisma.order.create({
     data: {
       orgId: tenant.id,
@@ -214,8 +177,8 @@ async function main() {
       status: 'SHIPPED',
       items: {
         create: [
-          { productId: products[0].id, quantity: 5, price: 1299.00 },
-          { productId: products[2].id, quantity: 10, price: 999.00 },
+          { productId: products[0].id, quantity: 5, price: 1299.0 },
+          { productId: products[2].id, quantity: 10, price: 999.0 },
         ],
       },
     },
@@ -229,9 +192,7 @@ async function main() {
       customerName: 'Office Depot Corp.',
       status: 'PROCESSING',
       items: {
-        create: [
-          { productId: products[1].id, quantity: 8, price: 450.00 },
-        ],
+        create: [{ productId: products[1].id, quantity: 8, price: 450.0 }],
       },
     },
   })
@@ -245,8 +206,8 @@ async function main() {
       status: 'DELIVERED',
       items: {
         create: [
-          { productId: products[0].id, quantity: 3, price: 1299.00 },
-          { productId: products[3].id, quantity: 3, price: 110.00 },
+          { productId: products[0].id, quantity: 3, price: 1299.0 },
+          { productId: products[3].id, quantity: 3, price: 110.0 },
         ],
       },
     },
@@ -260,14 +221,57 @@ async function main() {
       customerName: 'Brooklyn Schools District',
       status: 'PENDING',
       items: {
-        create: [
-          { productId: products[1].id, quantity: 20, price: 450.00 },
-        ],
+        create: [{ productId: products[1].id, quantity: 20, price: 450.0 }],
       },
     },
   })
-
   console.log('✅ Orders created')
+
+  // OUT movements for every order line (signed negative), linked to the order.
+  await Promise.all([
+    prisma.stockMovement.create({
+      data: { orgId: tenant.id, productId: products[0].id, userId: staff1.id, orderId: order1.id, type: 'OUT', quantity: -5, reason: 'Order ORD-1021' },
+    }),
+    prisma.stockMovement.create({
+      data: { orgId: tenant.id, productId: products[2].id, userId: staff1.id, orderId: order1.id, type: 'OUT', quantity: -10, reason: 'Order ORD-1021' },
+    }),
+    prisma.stockMovement.create({
+      data: { orgId: tenant.id, productId: products[1].id, userId: manager1.id, orderId: order2.id, type: 'OUT', quantity: -8, reason: 'Order ORD-1020' },
+    }),
+    prisma.stockMovement.create({
+      data: { orgId: tenant.id, productId: products[0].id, userId: staff1.id, orderId: order3.id, type: 'OUT', quantity: -3, reason: 'Order ORD-1019' },
+    }),
+    prisma.stockMovement.create({
+      data: { orgId: tenant.id, productId: products[3].id, userId: staff1.id, orderId: order3.id, type: 'OUT', quantity: -3, reason: 'Order ORD-1019' },
+    }),
+    prisma.stockMovement.create({
+      data: { orgId: tenant.id, productId: products[1].id, userId: manager1.id, orderId: order4.id, type: 'OUT', quantity: -20, reason: 'Order ORD-1018' },
+    }),
+  ])
+
+  // A cycle-count correction (ADJUSTMENT stores a signed delta to reach the counted value).
+  await prisma.stockMovement.create({
+    data: { orgId: tenant.id, productId: products[3].id, userId: owner.id, type: 'ADJUSTMENT', quantity: -1, reason: 'Cycle Count Audit' },
+  })
+  console.log('✅ Stock movements (OUT / ADJUSTMENT) created')
+
+  // Rebuild the cachedQuantity projection from the ledger (single source of truth).
+  const sums = await prisma.stockMovement.groupBy({
+    by: ['productId'],
+    where: { orgId: tenant.id },
+    _sum: { quantity: true },
+  })
+  const sumByProduct = new Map(sums.map((s) => [s.productId, s._sum.quantity ?? 0]))
+  await Promise.all(
+    products.map((p) =>
+      prisma.product.update({
+        where: { id: p.id },
+        data: { cachedQuantity: sumByProduct.get(p.id) ?? 0 },
+      })
+    )
+  )
+  console.log('✅ cachedQuantity reconciled from ledger')
+
   console.log('🎉 Seed complete!')
 }
 

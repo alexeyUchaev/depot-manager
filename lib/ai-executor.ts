@@ -1,5 +1,6 @@
 import * as services from "@/services";
 import { DEMO_TENANT_ID, DEMO_USER_ID } from "./constants";
+import { analyticsService } from "@/services/analytics.service";
 export async function executeTool(name: string, args: any) {
   const tenantId = DEMO_TENANT_ID;
   const userId = DEMO_USER_ID;
@@ -15,7 +16,6 @@ export async function executeTool(name: string, args: any) {
         category: args.category,
         location: args.location,
         price: args.price,
-        quantity: args.quantity || 0,
         lowStockAt: args.lowStockAt || 10
       });
 
@@ -23,15 +23,15 @@ export async function executeTool(name: string, args: any) {
       return await services.orderService.getAllByTenant(tenantId);
 
     case "createOrder": {
-      // Резолвим productId → цену из БД (модели цену не доверяем)
       const items = [];
       for (const p of args.products ?? []) {
-        const product = await services.getById(p.productId, tenantId);
+        const product = await services.getBySku(p.sku, tenantId);
         if (!product) {
-          return { error: `Товар не найден: ${p.productId}` };
+          return { error: `Товар не найден: ${p.sku}` };
         }
         items.push({
-          productId: p.productId,
+          id: product.id,
+          sku: product.sku,
           quantity: Number(p.quantity),
           price: product.price,
         });
@@ -42,6 +42,8 @@ export async function executeTool(name: string, args: any) {
         items,
       });
     }
+    case "getAnalytics":
+    return await analyticsService.getAnalytics(tenantId)
 
     default:
       throw new Error(`Tool ${name} is not implemented.`);

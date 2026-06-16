@@ -30,13 +30,11 @@ export const analyticsService = {
 
   async getAnalytics(tenantId: string): Promise<AnalyticsData> {
     
-    // Текущий месяц
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
-    // Заказы текущего месяца
     const currentMonthOrders = await prisma.order.findMany({
       where: {
         orgId: tenantId,
@@ -52,7 +50,6 @@ export const analyticsService = {
       0
     )
 
-    // Заказы прошлого месяца
     const lastMonthOrders = await prisma.order.findMany({
       where: {
         orgId: tenantId,
@@ -72,22 +69,19 @@ export const analyticsService = {
       ? ((grossRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
       : 0
 
-    // Стоимость инвентаря
     const products = await prisma.product.findMany({
       where: { orgId: tenantId },
     })
 
     const inventoryValuation = products.reduce(
-      (sum, p) => sum + Number(p.price) * p.quantity,
+      (sum, p) => sum + Number(p.price) * p.cachedQuantity,
       0
     )
 
-    // Всего заказов за месяц
     const totalOrders = await prisma.order.count({
       where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
     })
 
-    // Выручка за 6 месяцев
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const monthlyRevenue = await Promise.all(
       Array.from({ length: 6 }, (_, i) => {
@@ -112,7 +106,6 @@ export const analyticsService = {
       })
     )
 
-    // Топ продукты
     const orderItems = await prisma.orderItem.findMany({
       where: { order: { orgId: tenantId } },
       include: { product: { select: { name: true, sku: true } } },
@@ -138,19 +131,23 @@ export const analyticsService = {
         trend: 'up' as const,
       }))
 
-    // Движения IN/OUT
     const movements = await prisma.stockMovement.findMany({
       where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
     })
 
-    const inUnits = movements.filter(m => m.type === 'IN').reduce((s, m) => s + m.quantity, 0)
-    const outUnits = movements.filter(m => m.type === 'OUT').reduce((s, m) => s + m.quantity, 0)
+    // Ledger quantities are signed (OUT is negative) — use magnitudes here.
+    const inUnits = movements.filter(m => m.type === 'IN').reduce((s, m) => s + Math.abs(m.quantity), 0)
+    const outUnits = movements.filter(m => m.type === 'OUT').reduce((s, m) => s + Math.abs(m.quantity), 0)
 
-    // Low stock
-    const lowStockProducts = await prisma.product.findMany({
-      where: { orgId: tenantId, quantity: { lte: 5 } },
-      select: { name: true, sku: true, quantity: true },
+    const lowStock = await prisma.product.findMany({
+      where: { orgId: tenantId, cachedQuantity: { lte: prisma.product.fields.lowStockAt } },
+      select: { name: true, sku: true, cachedQuantity: true },
     })
+    const lowStockProducts = lowStock.map((p) => ({
+      name: p.name,
+      sku: p.sku,
+      quantity: p.cachedQuantity,
+    }))
 
     return {
       grossRevenue,
