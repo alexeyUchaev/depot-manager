@@ -97,7 +97,7 @@ export const orderService = {
             status: 'PENDING',
             items: {
               create: data.items.map((item) => ({
-                productId: item.sku,
+                productId: item.id,
                 quantity: item.quantity,
                 price: item.price,
               })),
