@@ -21,7 +21,7 @@ export async function getMovements(): Promise<ActionResult<MovementDTO[]>> {
 
 export async function createMovement(data: {
   productId: string
-  type: 'IN' | 'OUT' | 'ADJUSTMENT'
+  type: 'IN' | 'OUT'
   quantity: number
   reason?: string
 }): Promise<ActionResult<MovementDTO>> {
