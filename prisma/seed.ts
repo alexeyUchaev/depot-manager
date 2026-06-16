@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
+import { DEMO_TENANT_ID, DEMO_USER_ID } from '../lib/constants'
 
 const { Pool } = pg
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
@@ -13,6 +14,7 @@ async function main() {
   // Tenant
   const tenant = await prisma.tenant.create({
     data: {
+      id: DEMO_TENANT_ID,
       name: 'TechMart Wholesale Inc.',
       slug: 'techmart-wholesale',
       clerkOrgId: 'demo_org_techmart',
@@ -24,6 +26,7 @@ async function main() {
   // Users
   const owner = await prisma.user.create({
     data: {
+      id: DEMO_USER_ID,
       clerkId: 'demo_user_owner',
       tenantId: tenant.id,
       email: 'alexey@techmartwholesale.com',
