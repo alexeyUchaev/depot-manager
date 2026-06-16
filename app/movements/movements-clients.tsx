@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom';
 import {
   ArrowDownCircle,
   ArrowUpCircle,
-  SlidersHorizontal,
   Search,
   Plus,
   FileText,
@@ -23,18 +22,10 @@ function TypeBadge({ type }: { type: MovementDTO['type'] }) {
       </span>
     );
   }
-  if (type === 'OUT') {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900">
-        <ArrowUpCircle className="h-3 w-3" />
-        OUT
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900">
-      <SlidersHorizontal className="h-3 w-3" />
-      ADJUSTMENT
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900">
+      <ArrowUpCircle className="h-3 w-3" />
+      OUT
     </span>
   );
 }
@@ -123,7 +114,7 @@ export default function MovementsClient({ movements }: { movements: MovementDTO[
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Stock Movements</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Real-time audit log of all inventory changes — incoming, outgoing, and adjustments.
+            Real-time audit log of all inventory changes — incoming and outgoing.
           </p>
         </div>
         <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full sm:w-auto">
