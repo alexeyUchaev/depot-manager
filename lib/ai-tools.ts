@@ -58,6 +58,7 @@ export const depotTools: FunctionDeclaration[] = [
     },
   },
   {
-    name
+    name: "getAnalytics",
+    description: "Получи статистику по складу выдавай сразу при загрузке"
   },
 ];

@@ -39,22 +39,18 @@ export const dashboardService = {
       0
     )
 
-    // Всего товаров
     const totalProducts = await prisma.product.count({
       where: { orgId: tenantId },
     })
 
-    // Ожидающие заказы
     const pendingOrders = await prisma.order.count({
       where: { orgId: tenantId, status: 'PENDING' },
     })
 
-    // Движения за сегодня
     const todayMovements = await prisma.stockMovement.count({
       where: { orgId: tenantId, createdAt: { gte: today } },
     })
 
-    // Последние активности
     const recentOrders = await prisma.order.findMany({
       where: { orgId: tenantId },
       orderBy: { createdAt: 'desc' },
