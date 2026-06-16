@@ -23,15 +23,14 @@ export async function executeTool(name: string, args: any) {
       return await services.orderService.getAllByTenant(tenantId);
 
     case "createOrder": {
-      // Резолвим productId → цену из БД (модели цену не доверяем)
       const items = [];
       for (const p of args.products ?? []) {
-        const product = await services.getById(p.productId, tenantId);
+        const product = await services.getBySku(p.sku, tenantId);
         if (!product) {
-          return { error: `Товар не найден: ${p.productId}` };
+          return { error: `Товар не найден: ${p.sku}` };
         }
         items.push({
-          productId: p.productId,
+          sku: p.sku,
           quantity: Number(p.quantity),
           price: product.price,
         });
@@ -42,7 +41,6 @@ export async function executeTool(name: string, args: any) {
         items,
       });
     }
-
     default:
       throw new Error(`Tool ${name} is not implemented.`);
   }

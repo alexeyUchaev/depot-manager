@@ -58,9 +58,9 @@ export const getAllProductsByTenant = async (tenantId: string): Promise<ProductD
   }
 
  
-export const  getById = async (id: string, tenantId: string): Promise<ProductDTO | null> => {
+export const  getBySku = async (sku: string, tenantId: string): Promise<ProductDTO | null> => {
     const product = await prisma.product.findFirst({
-      where: { id, orgId: tenantId },
+      where: { sku, orgId: tenantId },
       select: {
         id: true,
         name: true,

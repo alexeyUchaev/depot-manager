@@ -67,7 +67,7 @@ export const orderService = {
     userId: string,
     data: {
       customerName: string
-      items: { productId: string; quantity: number; price: number }[]
+      items: { sku: string; quantity: number; price: number }[]
     }
   ): Promise<ActionResult<OrderDTO>> {
     try {
@@ -75,10 +75,9 @@ export const orderService = {
       const orderNumber = `ORD-${String(count + 1).padStart(4, '0')}`
 
       const order = await prisma.$transaction(async (tx) => {
-        // Проверяем остатки
         for (const item of data.items) {
           const product = await tx.product.findFirst({
-            where: { id: item.productId, orgId: tenantId },
+            where: { sku: item.productId, orgId: tenantId },
           })
           if (!product) throw new Error(`Product not found`)
           if (product.quantity < item.quantity) {

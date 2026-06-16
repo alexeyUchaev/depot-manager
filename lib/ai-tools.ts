@@ -47,7 +47,7 @@ export const depotTools: FunctionDeclaration[] = [
           items: {
             type: Type.OBJECT,
             properties: {
-              productId: { type: Type.STRING, description: "ID товара из getAllProductsByTenant" },
+              sku: { type: Type.STRING, description: "Sku товара из getAllProductsByTenant" },
               quantity:  { type: Type.NUMBER, description: "Количество" },
             },
             required: ["productId", "quantity"],
