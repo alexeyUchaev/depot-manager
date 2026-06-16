@@ -21,7 +21,7 @@ export async function getOrders(): Promise<ActionResult<OrderDTO[]>> {
 
 export async function createOrder(data: {
   customerName: string
-  items: { productId: string; quantity: number; price: number }[]
+  items: { sku: string; quantity: number; price: number }[]
 }): Promise<ActionResult<OrderDTO>> {
   try {
     const result = await orderService.create(DEMO_TENANT_ID, DEMO_USER_ID, data)
