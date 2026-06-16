@@ -69,7 +69,7 @@ model StockMovement {
   userId    String
   orderId   String?
   type      MovementType
-  // SIGNED effect on stock: IN => +q, OUT => -q, ADJUSTMENT => delta to reach target.
+  // SIGNED effect on stock: IN => +q, OUT => -q.
   // Append-only ledger and the single SOURCE OF TRUTH for stock. Never edit/delete
   // a row — corrections are new rows. Current stock = SUM(quantity).
   quantity  Int
@@ -124,7 +124,6 @@ enum Plan {
 enum MovementType {
   IN
   OUT
-  ADJUSTMENT
 }
 
 enum OrderStatus {
