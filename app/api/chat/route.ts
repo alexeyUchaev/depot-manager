@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         }
 
         const chat = ai.chats.create({
-          model: "gemini-2.5-flash",
+          model: "gemini-2.5-flash-lite",
           history,
           config: {
             systemInstruction: SYSTEM_INSTRUCTION,
