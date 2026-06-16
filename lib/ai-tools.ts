@@ -29,7 +29,7 @@ export const depotTools: FunctionDeclaration[] = [
   },
   {
     name: "getAllByTenant",
-    description: "Get all order by tenant"
+    description: "Получить список всех заказов тенанта (номер, клиент, статус, позиции, сумма).",
   },
   {
     name: "createOrder",
@@ -43,6 +43,7 @@ export const depotTools: FunctionDeclaration[] = [
         customerName: { type: Type.STRING, description: "Имя клиента / заказчика" },
         products: {
           type: Type.ARRAY,
+          description: "Позиции заказа",
           items: {
             type: Type.OBJECT,
             properties: {
