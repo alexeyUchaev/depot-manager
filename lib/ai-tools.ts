@@ -12,7 +12,7 @@ export const depotTools: FunctionDeclaration[] = [
   },
   {
     name: "createProduct",
-    description: "Создать новый товар на складе.",
+    description: "Создать новый товар на складе. ",
     parameters: {
       type: Type.OBJECT,
       properties: {
