@@ -28,13 +28,13 @@ export function DemoModal({ onClose }: DemoModalProps) {
   return createPortal(
     <>
       <div className="fixed top-40 w-full px-2 z-50 flex items-end sm:items-center justify-center">
-        <button
-          onClick={onClose}
-          className="fixed top-40 right-4 z-10 p-2 rounded-full bg-card/90 hover:bg-card text-card-foreground shadow-md transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
         <div className="relative w-full sm:max-w-md bg-card rounded-2xl shadow-xl max-h-[85vh] overflow-y-auto">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <div className="p-6 space-y-4 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Sparkles className="h-6 w-6" />
