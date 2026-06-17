@@ -21,7 +21,7 @@ export interface AgentStep {
   timestamp: Date
 }
 
-// Сообщение в чате
+// A chat message
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
@@ -31,7 +31,7 @@ export interface ChatMessage {
   isStreaming?: boolean
 }
 
-// Состояние чата
+// Chat state
 export interface ChatState {
   messages: ChatMessage[]
   isLoading: boolean
@@ -42,7 +42,7 @@ export interface ChatState {
   }
 }
 
-// Результат tool execution от API
+// Tool execution result from the API
 export interface ToolExecutionResult {
   type: 'text' | 'tool_call' | 'tool_result' | 'error' | 'done'
   content?: string

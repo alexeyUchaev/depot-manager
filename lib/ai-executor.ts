@@ -31,7 +31,7 @@ export async function executeTool(name: string, args: any) {
       for (const p of args.products ?? []) {
         const product = await services.getBySku(p.sku, tenantId);
         if (!product) {
-          return { error: `Товар не найден: ${p.sku}` };
+          return { error: `Product not found: ${p.sku}` };
         }
         items.push({
           id: product.id,
