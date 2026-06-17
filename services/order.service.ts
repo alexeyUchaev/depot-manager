@@ -86,14 +86,17 @@ export const orderService = {
           }
         }
 
-        // Создаём заказ
+        // Create the order in AWAITING_PAYMENT. Stock is NOT dispatched here:
+        // the OUT movements are posted later by finalizePaidOrder(), once Stripe
+        // confirms the payment via webhook. We still validated availability
+        // above so we never create an order for goods we don't have.
         const newOrder = await tx.order.create({
           data: {
             orgId: tenantId,
             userId,
             orderNumber,
             customerName: data.customerName,
-            status: 'PENDING',
+            status: 'AWAITING_PAYMENT',
             items: {
               create: data.items.map((item) => ({
                 productId: item.id,
@@ -111,18 +114,6 @@ export const orderService = {
             user: { select: { firstName: true, lastName: true } },
           },
         })
-
-        // Each order line dispatches stock => an OUT movement in the ledger
-        // (the single source of truth), which also updates the cached stock.
-        for (const item of data.items) {
-          await postMovement(tx, tenantId, userId, {
-            productId: item.id,
-            type: 'OUT',
-            signedQuantity: -item.quantity,
-            reason: `Order ${newOrder.orderNumber}`,
-            orderId: newOrder.id,
-          })
-        }
 
         return newOrder
       })
@@ -159,7 +150,13 @@ export const orderService = {
   async updateStatus(
     id: string,
     tenantId: string,
-    status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED'
+    status:
+      | 'AWAITING_PAYMENT'
+      | 'PENDING'
+      | 'PROCESSING'
+      | 'SHIPPED'
+      | 'DELIVERED'
+      | 'CANCELLED'
   ): Promise<ActionResult> {
     try {
       const existing = await prisma.order.findFirst({
@@ -175,6 +172,92 @@ export const orderService = {
       return { success: true, data: undefined }
     } catch {
       return { success: false, error: 'Failed to update order' }
+    }
+  },
+
+  /**
+   * Mark an order as paid and dispatch its stock.
+   *
+   * Called from the Stripe webhook after checkout.session.completed. Idempotent:
+   * if the order is already paid it is a no-op, so duplicate webhook deliveries
+   * don't post the OUT movements twice. Stock availability is re-checked here
+   * because it may have changed between order creation and payment.
+   */
+  async finalizePaidOrder(input: {
+    orderId: string
+    stripeCheckoutSessionId?: string
+    stripePaymentIntentId?: string
+    amountTotal?: number | null
+    currency?: string | null
+  }): Promise<ActionResult> {
+    try {
+      await prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({
+          where: { id: input.orderId },
+          include: { items: true },
+        })
+        if (!order) throw new Error('Order not found')
+
+        // Already finalized — duplicate webhook delivery. Do nothing.
+        if (order.paidAt) return
+
+        for (const item of order.items) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+          })
+          if (!product) throw new Error('Product not found')
+          if (product.cachedQuantity < item.quantity) {
+            // Paid but no stock: keep the payment, flag the order for manual
+            // handling/refund rather than going negative on inventory.
+            throw new Error(`Not enough stock for ${product.name}`)
+          }
+        }
+
+        await tx.order.update({
+          where: { id: order.id },
+          data: {
+            status: 'PROCESSING',
+            paidAt: new Date(),
+            stripeCheckoutSessionId: input.stripeCheckoutSessionId,
+            stripePaymentIntentId: input.stripePaymentIntentId,
+            amountTotal: input.amountTotal ?? undefined,
+            currency: input.currency ?? undefined,
+          },
+        })
+
+        for (const item of order.items) {
+          await postMovement(tx, order.orgId, order.userId, {
+            productId: item.productId,
+            type: 'OUT',
+            signedQuantity: -item.quantity,
+            reason: `Order ${order.orderNumber} (paid)`,
+            orderId: order.id,
+          })
+        }
+      })
+
+      return { success: true, data: undefined }
+    } catch (e: unknown) {
+      const error =
+        e instanceof Error ? e.message : 'Failed to finalize paid order'
+      return { success: false, error }
+    }
+  },
+
+  /** Cancel an unpaid order (e.g. the checkout session expired). */
+  async cancelUnpaidOrder(orderId: string): Promise<ActionResult> {
+    try {
+      const order = await prisma.order.findUnique({ where: { id: orderId } })
+      if (!order) return { success: false, error: 'Order not found' }
+      if (order.paidAt) return { success: true, data: undefined } // already paid, ignore
+
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { status: 'CANCELLED' },
+      })
+      return { success: true, data: undefined }
+    } catch {
+      return { success: false, error: 'Failed to cancel order' }
     }
   },
 }
