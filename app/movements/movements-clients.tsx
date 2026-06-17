@@ -117,10 +117,6 @@ export default function MovementsClient({ movements }: { movements: MovementDTO[
             Real-time audit log of all inventory changes — incoming and outgoing.
           </p>
         </div>
-        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors whitespace-nowrap w-full sm:w-auto">
-          <Plus className="h-4 w-4" />
-          New Movement
-        </button>
       </div>
       <div className="bg-card border rounded-xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="relative flex-1 sm:max-w-md">

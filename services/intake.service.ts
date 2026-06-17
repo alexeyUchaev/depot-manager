@@ -2,9 +2,9 @@ import { prisma } from '@/lib/prisma'
 import type { ActionResult } from '@/types/user.types'
 import { postMovement } from './stock.service'
 
-export type OrderDTO = {
+export type IntakeDTO = {
   id: string
-  orderNumber: string
+  intakeNumber: string
   customerName: string
   status: string
   createdAt: Date
@@ -21,10 +21,10 @@ export type OrderDTO = {
   assignedTo: string
 }
 
-export const orderService = {
+export const intakeService = {
 
-  async getAllByTenant(tenantId: string): Promise<OrderDTO[]> {
-    const orders = await prisma.order.findMany({
+  async getAllIntakesByTenant(tenantId: string): Promise<IntakeDTO[]> {
+    const intakes = await prisma.intake.findMany({
       where: { orgId: tenantId },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -41,23 +41,23 @@ export const orderService = {
       },
     })
 
-    return orders.map((order) => ({
-      id: order.id,
-      orderNumber: order.orderNumber,
-      customerName: order.customerName,
-      status: order.status,
-      createdAt: order.createdAt,
-      items: order.items.map((item) => ({
+    return intakes.map((intake) => ({
+      id: intake.id,
+      intakeNumber: intake.intakeNumber,
+      customerName: intake.customerName,
+      status: intake.status,
+      createdAt: intake.createdAt,
+      items: intake.items.map((item) => ({
         id: item.id,
         quantity: item.quantity,
         price: Number(item.price),
         product: item.product,
       })),
-      total: order.items.reduce(
+      total: intake.items.reduce(
         (sum, item) => sum + Number(item.price) * item.quantity,
         0
       ),
-      assignedTo: [order.user.firstName, order.user.lastName]
+      assignedTo: [intake.user.firstName, intake.user.lastName]
         .filter(Boolean)
         .join(' '),
     }))
@@ -70,30 +70,28 @@ export const orderService = {
       customerName: string
       items: { id: string, sku: string; quantity: number; price: number }[]
     }
-  ): Promise<ActionResult<OrderDTO>> {
+  ): Promise<ActionResult<IntakeDTO>> {
     try {
-      const count = await prisma.order.count({ where: { orgId: tenantId } })
-      const orderNumber = `ORD-${1000 + count + 1}`
+      const count = await prisma.intake.count({ where: { orgId: tenantId } })
+      const intakeNumber = `ITK-${1000 + count + 1}`
 
-      const order = await prisma.$transaction(async (tx) => {
+      const intake = await prisma.$transaction(async (tx) => {
+        // An intake RECEIVES goods — we only need the product to exist.
+        // There's no "enough stock" requirement here (that's for outbound orders).
         for (const item of data.items) {
           const product = await tx.product.findFirst({
             where: { sku: item.sku, orgId: tenantId },
           })
           if (!product) throw new Error(`Product not found`)
-          if (product.cachedQuantity < item.quantity) {
-            throw new Error(`Not enough stock for ${product.name}`)
-          }
         }
 
-        // Создаём заказ
-        const newOrder = await tx.order.create({
+        const newIntake = await tx.intake.create({
           data: {
             orgId: tenantId,
             userId,
-            orderNumber,
+            intakeNumber,
             customerName: data.customerName,
-            status: 'PENDING',
+            status: 'REQUESTED',
             items: {
               create: data.items.map((item) => ({
                 productId: item.id,
@@ -112,40 +110,40 @@ export const orderService = {
           },
         })
 
-        // Each order line dispatches stock => an OUT movement in the ledger
+        // Each intake line receives stock => an IN movement in the ledger
         // (the single source of truth), which also updates the cached stock.
         for (const item of data.items) {
           await postMovement(tx, tenantId, userId, {
             productId: item.id,
-            type: 'OUT',
-            signedQuantity: -item.quantity,
-            reason: `Order ${newOrder.orderNumber}`,
-            orderId: newOrder.id,
+            type: 'IN',
+            signedQuantity: item.quantity,
+            reason: `Intake ${newIntake.intakeNumber}`,
+            takeId: newIntake.id,
           })
         }
 
-        return newOrder
+        return newIntake
       })
 
       return {
         success: true,
         data: {
-          id: order.id,
-          orderNumber: order.orderNumber,
-          customerName: order.customerName,
-          status: order.status,
-          createdAt: order.createdAt,
-          items: order.items.map((item) => ({
+          id: intake.id,
+          intakeNumber: intake.intakeNumber,
+          customerName: intake.customerName,
+          status: intake.status,
+          createdAt: intake.createdAt,
+          items: intake.items.map((item) => ({
             id: item.id,
             quantity: item.quantity,
             price: Number(item.price),
             product: item.product,
           })),
-          total: order.items.reduce(
+          total: intake.items.reduce(
             (sum, item) => sum + Number(item.price) * item.quantity,
             0
           ),
-          assignedTo: [order.user.firstName, order.user.lastName]
+          assignedTo: [intake.user.firstName, intake.user.lastName]
             .filter(Boolean)
             .join(' '),
         },
@@ -159,22 +157,22 @@ export const orderService = {
   async updateStatus(
     id: string,
     tenantId: string,
-    status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED'
+    status: 'REQUESTED' | 'ACCEPTED' | 'ARRIVED' | 'IN_TRANSIT' | 'REJECTED'
   ): Promise<ActionResult> {
     try {
-      const existing = await prisma.order.findFirst({
+      const existing = await prisma.intake.findFirst({
         where: { id, orgId: tenantId },
       })
-      if (!existing) return { success: false, error: 'Order not found' }
+      if (!existing) return { success: false, error: 'Intake not found' }
 
-      await prisma.order.update({
+      await prisma.intake.update({
         where: { id },
         data: { status },
       })
 
       return { success: true, data: undefined }
     } catch {
-      return { success: false, error: 'Failed to update order' }
+      return { success: false, error: 'Failed to update intake' } 
     }
   },
 }

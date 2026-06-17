@@ -2,51 +2,56 @@
 
 import React, { useState } from 'react';
 import {
-  ShoppingCart, Search, MoreVertical,
-  CheckCircle2, Truck, Clock, Package
+  PackagePlus, Search, MoreVertical,
+  CheckCircle2, Truck, Clock, PackageCheck, XCircle
 } from "lucide-react";
-import type { OrderDTO } from '@/services/order.service';
+import type { IntakeDTO } from '@/services/intake.service';
 import { DetailModal } from '@/components/detail-modal';
 import { DemoModal } from '@/components/demo-modal';
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === 'DELIVERED') return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium  bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-900">
-      <CheckCircle2 className="h-3 w-3" /> Delivered
-    </span>
-  );
-  if (status === 'SHIPPED') return (
+  if (status === 'IN_TRANSIT') return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-900">
-      <Truck className="h-3 w-3" /> Shipped
+      <Truck className="h-3 w-3" /> IN TRANSIT
     </span>
   );
-  if (status === 'PROCESSING') return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900">
-      <Clock className="h-3 w-3" /> Processing
+  if (status === 'ARRIVED') return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-400 dark:border-indigo-900">
+      <PackageCheck className="h-3 w-3" /> ARRIVED
+    </span>
+  );
+  if (status === 'ACCEPTED') return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-900">
+      <CheckCircle2 className="h-3 w-3" /> ACCEPTED
+    </span>
+  );
+  if (status === 'REJECTED') return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900">
+      <XCircle className="h-3 w-3" /> REJECTED
     </span>
   );
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
-      <Package className="h-3 w-3" /> Pending
+      <Clock className="h-3 w-3" /> Requested
     </span>
   );
 }
 
-export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
-  const [selected, setSelected] = useState<OrderDTO | null>(null);
+export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
+  const [selected, setSelected] = useState<IntakeDTO | null>(null);
   const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <div className="p-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-foreground">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Orders</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Intakes</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage outbound orders, pick lists, and shipment tracking.
+            Manage outbound intakes, pick lists, and shipment tracking.
           </p>
         </div>
         <button onClick={() => setDemoOpen(true)} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
-          <ShoppingCart className="h-4 w-4" /> Create Order
+          <PackagePlus className="h-4 w-4" /> Create Intake
         </button>
       </div>
 
@@ -57,22 +62,22 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
             className="w-full pl-9 pr-3 py-2 bg-muted border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
         <div className="flex items-center justify-between md:justify-end gap-2 text-xs text-muted-foreground font-medium">
-          Total Orders: <span className="text-sm font-bold text-foreground bg-muted px-2 py-0.5 rounded ml-1">{orders.length}</span>
+          Total Orders: <span className="text-sm font-bold text-foreground bg-muted px-2 py-0.5 rounded ml-1">{intakes.length}</span>
         </div>
       </div>
 
       {/* Mobile cards */}
       <div className="md:hidden space-y-2">
-        {orders.map((order) => (
-          <button key={order.id} onClick={() => setSelected(order)}
+        {intakes.map((intake) => (
+          <button key={intake.id} onClick={() => setSelected(intake)}
             className="w-full text-left bg-card border rounded-lg p-3 shadow-sm flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0 overflow-hidden">
-              <div className="font-mono text-xs font-bold text-foreground">{order.orderNumber}</div>
+              <div className="font-mono text-xs font-bold text-foreground">{intake.intakeNumber}</div>
               <div className="text-sm text-muted-foreground mt-1">
-                {order.customerName.length > 18 ? order.customerName.slice(0, 18) + '…' : order.customerName}
+                {intake.customerName.length > 18 ? intake.customerName.slice(0, 18) + '…' : intake.customerName}
               </div>
             </div>
-            <div className="font-bold text-foreground shrink-0">${order.total.toFixed(2)}</div>
+            <div className="font-bold text-foreground shrink-0">${intake.total.toFixed(2)}</div>
           </button>
         ))}
       </div>
@@ -93,31 +98,31 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-sm">
-              {orders.map((order) => (
-                <tr key={order.id} 
+              {intakes.map((intake) => (
+                <tr key={intake.id} 
                   className="hover:bg-muted/50 transition-colors cursor-pointer">
                   <td className="px-6 py-4">
-                    <div className="font-mono text-xs font-bold text-foreground bg-muted border inline-block px-1.5 py-0.5 rounded">{order.orderNumber}</div>
+                    <div className="font-mono text-xs font-bold text-foreground bg-muted border inline-block px-1.5 py-0.5 rounded">{intake.intakeNumber}</div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {new Date(intake.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </div>
                   </td>
-                  <td className="px-6 py-4"><div className="font-medium text-foreground">{order.customerName}</div></td>
+                  <td className="px-6 py-4"><div className="font-medium text-foreground">{intake.customerName}</div></td>
                   <td className="px-6 py-4 max-w-xs hidden lg:table-cell">
                     <div className="text-foreground font-medium truncate">
-                      {order.items.map(i => `${i.product.name} ×${i.quantity}`).join(', ')}
+                      {intake.items.map(i => `${i.product.name} ×${i.quantity}`).join(', ')}
                     </div>
                   </td>
                   <td className="px-6 py-4 hidden 2xl:table-cell">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                        {order.assignedTo.split(' ').map(n => n[0]).join('')}
+                        {intake.assignedTo.split(' ').map(n => n[0]).join('')}
                       </div>
-                      <span className="text-sm text-muted-foreground">{order.assignedTo}</span>
+                      <span className="text-sm text-muted-foreground">{intake.assignedTo}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-bold text-foreground hidden 2xl:table-cell">${order.total.toFixed(2)}</td>
-                  <td className="px-6 py-4 hidden 2xl:table-cell"><StatusBadge status={order.status} /></td>
+                  <td className="px-6 py-4 font-bold text-foreground hidden 2xl:table-cell">${intake.total.toFixed(2)}</td>
+                  <td className="px-6 py-4 hidden 2xl:table-cell"><StatusBadge status={intake.status} /></td>
                   <td className="px-6 py-4 text-right">
                     <button className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors">
                       <MoreVertical className="h-4 w-4" />
@@ -131,8 +136,8 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
       </div>
 
       {selected && (
-        <DetailModal//localhost:3000/orders
-          title={selected.orderNumber}
+        <DetailModal//localhost:3000/intakes
+          title={selected.intakeNumber}
           badges={<StatusBadge status={selected.status} />}
           rows={[
             { label: 'Customer', value: selected.customerName },
