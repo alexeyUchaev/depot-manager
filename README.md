@@ -10,7 +10,7 @@ A modern warehouse management SaaS built with Next.js 16, Prisma 7, and AI.
 
 - 📦 **Inventory Management** — Track products, stock levels, and warehouse locations
 - 📋 **Orders** — Manage outbound orders with real-time status updates
-- 📊 **Stock Movements** — Full audit log of all inventory changes (IN/OUT/ADJUSTMENT)
+- 📊 **Stock Movements** — Full audit log of all inventory changes (IN/OUT)
 - 📈 **Analytics** — Revenue, inventory valuation, and top selling products
 - 🤖 **AI Assistant** — Ask questions about your warehouse in natural language
 - 👥 **Team Management** — Role-based access (Owner, Manager, Staff)

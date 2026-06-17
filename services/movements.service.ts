@@ -50,7 +50,7 @@ export const movementService = {
     userId: string,
     data: {
       productId: string
-      type: 'IN' | 'OUT' | 'ADJUSTMENT'
+      type: 'IN' | 'OUT'
       quantity: number
       reason?: string
     }
@@ -61,15 +61,10 @@ export const movementService = {
       })
       if (!product) return { success: false, error: 'Product not found' }
 
-      // The ledger stores a SIGNED effect on stock.
-      // IN => +q, OUT => -q, ADJUSTMENT => set stock to the entered value N.
+      // The ledger stores a SIGNED effect on stock: IN => +q, OUT => -q.
+      // Every stock change is a directional document — no special adjustments.
       const magnitude = Math.abs(data.quantity)
-      const signedQuantity =
-        data.type === 'IN'
-          ? magnitude
-          : data.type === 'OUT'
-          ? -magnitude
-          : data.quantity - product.cachedQuantity // ADJUSTMENT: delta to reach N
+      const signedQuantity = data.type === 'IN' ? magnitude : -magnitude
 
       if (product.cachedQuantity + signedQuantity < 0) {
         return {

@@ -254,6 +254,7 @@ async function main() {
 
   console.log('✅ Stock movements (OUT / ADJUSTMENT) created')
 
+
   // Rebuild the cachedQuantity projection from the ledger (single source of truth).
   const sums = await prisma.stockMovement.groupBy({
     by: ['productId'],
