@@ -102,7 +102,7 @@ export const dashboardService = {
       .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
       .slice(0, 5)
 
-    // Активность за неделю
+    // Weekly activity
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     const weeklyActivity = await Promise.all(
       days.map(async (day, index) => {

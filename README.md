@@ -1,45 +1,98 @@
-# Depot Manager
+# DepotAI — AI-native Warehouse Management
 
-A modern warehouse management SaaS built with Next.js 16, Prisma 7, and AI.
+Manage an entire warehouse by **talking to an AI agent**. DepotAI is a multi-tenant inventory &
+order-management system where the AI assistant is a first-class interface: ask it in plain language
+to check stock, add products or place orders, and it executes the operation against live data using
+function calling — never hallucinating numbers.
+
+> Built with Next.js 16, React 19, Prisma 7 and Google Gemini.
 
 ## Live Demo
 
-🚀 [Open Demo](https://depot-manager-nx7e-git-main-alexs-projects-ba26bcc3.vercel.app/dashboard)
+🚀 **[Open the live demo](https://depot-manager-nx7e-git-main-alexs-projects-ba26bcc3.vercel.app/dashboard)**
+
+In the demo, sign-in is disabled and the manual “create” buttons are intentionally turned off —
+everything is created through the AI assistant. Try:
+
+> *“Create an order of 20 Hex Bolt M8 for Meridian Construction.”*
+
+…and watch the agent find the SKU, verify there is enough stock, and place the order.
+
+## Why it stands out
+
+- 🤖 **AI as the interface** — a tool-calling agent (Gemini) that reads real inventory and performs
+  actions (`getAllProductsByTenant`, `createProduct`, `createOrder`, `getAnalytics`) over a streaming
+  (SSE) loop. Voice input is supported.
+- 🧾 **Ledger-based stock accounting** — `StockMovement` is the single source of truth. Every IN/OUT
+  is an immutable, signed ledger entry written **atomically** alongside a denormalized
+  `cachedQuantity` projection, with a `reconcile()` routine to rebuild quantities from the ledger.
+  This is the pattern real accounting/ERP systems use — not a mutable `quantity` column.
+- 🏢 **Multi-tenant by design** — every query is scoped by tenant.
 
 ## Features
 
-- 📦 **Inventory Management** — Track products, stock levels, and warehouse locations
-- 📋 **Orders** — Manage outbound orders with real-time status updates
-- 📊 **Stock Movements** — Full audit log of all inventory changes (IN/OUT)
-- 📈 **Analytics** — Revenue, inventory valuation, and top selling products
-- 🤖 **AI Assistant** — Ask questions about your warehouse in natural language
-- 👥 **Team Management** — Role-based access (Owner, Manager, Staff)
-- 🏢 **Multi-tenant** — Each organization has isolated data
+- 📦 **Inventory** — products, stock levels, categories, warehouse locations, low-stock thresholds
+- 📥 **Intake** — inbound deliveries from suppliers (goods-in)
+- 📋 **Orders** — outbound orders with a status workflow
+- 🔁 **Stock Movements** — full audit log of every inventory change (IN/OUT) with user & reason
+- 📈 **Analytics** — revenue, inventory valuation, top products, monthly trend, low-stock list
+- 👥 **Users & Company** — role-based access (Owner, Manager, Staff)
 
 ## Tech Stack
 
-- **Frontend** — Next.js 16, React 19, Tailwind CSS, shadcn/ui
-- **Backend** — Next.js Server Actions, Prisma 7 ORM
-- **Database** — PostgreSQL (Supabase)
-- **AI** — Groq API (Llama 3.3 70B)
-- **Deployment** — Vercel
+| Layer | Tech |
+| --- | --- |
+| Frontend | Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui |
+| Backend | Next.js Server Actions, Prisma 7 ORM |
+| Database | PostgreSQL |
+| AI | Google Gemini (`@google/genai`) — function calling + SSE streaming |
+| Deployment | Vercel |
 
-## Architecture
+## Screenshots
+
+<!-- Drop images into docs/screenshots/ and reference them here, e.g.: -->
+<!-- ![Dashboard](docs/screenshots/dashboard.png) -->
+<!-- ![AI assistant placing an order](docs/screenshots/ai-agent.png) -->
+
+_Add a dashboard screenshot and a short GIF of the AI assistant placing an order here._
+
+## Getting Started
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment
+cp .env.example .env   # then fill in DATABASE_URL and GEMINI_API_KEY
+
+# 3. Create the schema and seed realistic demo data
+#    (~100 industrial/MRO SKUs, suppliers, customers, orders and movements)
+npx prisma db push
+npx prisma db seed
+
+# 4. Run the dev server
+npm run dev
+```
+
+Open <http://localhost:3000> — the root redirects to the dashboard.
+
+## Project Structure
 
 ```
-actions/          # Server Actions (API layer)
-services/         # Business logic
-components/       # UI components
-app/              # Next.js App Router pages
-prisma/           # Database schema and seed
-lib/              # Utilities (Prisma client)
-types/            # TypeScript types
+app/            # App Router pages (dashboard, inventory, intake, orders, movements, analytics, users, company)
+app/api/chat/   # Streaming AI agent endpoint (function-calling loop)
+actions/        # Server Actions — thin API layer over services
+services/       # Business logic — incl. stock.service.ts (the stock ledger)
+lib/            # ai-tools, ai-executor, prisma client, constants
+prisma/         # schema.prisma + seed.ts
+components/     # UI (shadcn/ui) + AI agent widgets
+schemas/        # Zod schemas
+types/          # TypeScript types
 ```
 
-## Key Business Logic
+## Notes
 
-- **Multi-tenant isolation** — all queries scoped by tenantId
-- **Stock movements** — every inventory change is logged with user, reason, and timestamp
-- **Low stock alerts** — automatic warnings when quantity drops below threshold
-- **AI warehouse assistant** — natural language queries over real inventory data
-
+This repository is a portfolio demo. Authentication is stubbed via a fixed demo tenant so the app
+runs without sign-in, and manual create actions are routed through the AI assistant. The stock
+ledger, multi-tenant data model and AI agent are production-style and meant to be reused as a
+starting point for real builds.
