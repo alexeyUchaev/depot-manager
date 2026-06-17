@@ -4,7 +4,7 @@ import { postMovement } from './stock.service'
 
 export type IntakeDTO = {
   id: string
-  orderNumber: string
+  intakeNuber: string
   customerName: string
   status: string
   createdAt: Date
@@ -21,7 +21,7 @@ export type IntakeDTO = {
   assignedTo: string
 }
 
-export const orderService = {
+export const intakeService = {
 
   async getAllIntakesByTenant(tenantId: string): Promise<IntakeDTO[]> {
     const intakes = await prisma.intake.findMany({
@@ -43,7 +43,7 @@ export const orderService = {
 
     return intakes.map((intake) => ({
       id: intake.id,
-      orderNumber: intake.orderNumber,
+      intakeNuber: intake.intakeNumber,
       customerName: intake.customerName,
       status: intake.status,
       createdAt: intake.createdAt,
@@ -130,7 +130,7 @@ export const orderService = {
         success: true,
         data: {
           id: intake.id,
-          orderNumber: intake.intakeNumber,
+          intakeNuber: intake.intakeNumber,
           customerName: intake.customerName,
           status: intake.status,
           createdAt: intake.createdAt,
@@ -173,7 +173,7 @@ export const orderService = {
 
       return { success: true, data: undefined }
     } catch {
-      return { success: false, error: 'Failed to update intake' }
+      return { success: false, error: 'Failed to update intake' } 
     }
   },
 }
