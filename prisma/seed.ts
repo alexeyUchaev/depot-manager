@@ -252,10 +252,6 @@ async function main() {
     }),
   ])
 
-  // A cycle-count correction (ADJUSTMENT stores a signed delta to reach the counted value).
-  await prisma.stockMovement.create({
-    data: { orgId: tenant.id, productId: products[3].id, userId: owner.id, type: 'ADJUSTMENT', quantity: -1, reason: 'Cycle Count Audit' },
-  })
   console.log('✅ Stock movements (OUT / ADJUSTMENT) created')
 
   // Rebuild the cachedQuantity projection from the ledger (single source of truth).
