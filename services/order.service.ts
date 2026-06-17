@@ -73,7 +73,7 @@ export const orderService = {
   ): Promise<ActionResult<OrderDTO>> {
     try {
       const count = await prisma.order.count({ where: { orgId: tenantId } })
-      const orderNumber = `ORD-${String(count + 1).padStart(4, '0')}`
+      const orderNumber = `ORD-${1000 + count + 1}`
 
       const order = await prisma.$transaction(async (tx) => {
         for (const item of data.items) {

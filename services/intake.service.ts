@@ -73,7 +73,7 @@ export const intakeService = {
   ): Promise<ActionResult<IntakeDTO>> {
     try {
       const count = await prisma.intake.count({ where: { orgId: tenantId } })
-      const intakeNumber = `INT-${String(count + 1).padStart(4, '0')}`
+      const intakeNumber = `ITK-${1000 + count + 1}`
 
       const intake = await prisma.$transaction(async (tx) => {
         // An intake RECEIVES goods — we only need the product to exist.
