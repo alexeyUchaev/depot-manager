@@ -86,7 +86,7 @@ export const orderService = {
           }
         }
 
-        // Создаём заказ
+        // Create the order
         const newOrder = await tx.order.create({
           data: {
             orgId: tenantId,

@@ -2,7 +2,7 @@
 import { z } from 'zod'
 import { UserRole } from '@prisma/client'
 
-// Схема для приглашения пользователя
+// Schema for inviting a user
 export const inviteUserSchema = z.object({
   email: z
     .string()
@@ -21,7 +21,7 @@ export const inviteUserSchema = z.object({
   }),
 })
 
-// Схема для обновления пользователя
+// Schema for updating a user
 export const updateUserSchema = z.object({
   firstName: z.string().max(100).optional(),
   lastName:  z.string().max(100).optional(),
@@ -29,12 +29,12 @@ export const updateUserSchema = z.object({
   isActive:  z.boolean().optional(),
 })
 
-// Схема для валидации ID
+// Schema for ID validation
 export const userIdSchema = z.object({
   id: z.string().uuid('Invalid ID format'),
 })
 
-// Схема для Clerk Webhook payload
+// Schema for Clerk webhook payload
 export const clerkUserCreatedSchema = z.object({
   type: z.literal('user.created'),
   data: z.object({

@@ -11,14 +11,14 @@ function getSpeechCtor() {
 export function useSpeech(onResult: (text: string) => void) {
   const supported = useSyncExternalStore(
     subscribe,
-    () => getSpeechCtor() !== null, // клиент
-    () => false                     // сервер
+    () => getSpeechCtor() !== null, // client
+    () => false                     // server
   )
 
   const [listening, setListening] = useState(false)
   const recRef = useRef<any>(null)
 
-  // свежий колбэк без пересоздания распознавателя
+  // keep the latest callback without recreating the recognizer
   const onResultRef = useRef(onResult)
   useEffect(() => {
     onResultRef.current = onResult

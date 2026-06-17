@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { depotTools } from "@/lib/ai-tools";
 import { executeTool } from "@/lib/ai-executor";
 
-export const runtime = "nodejs"; // нужен node-рантайм для executeTool/revalidatePath
+export const runtime = "nodejs"; // node runtime is required for executeTool/revalidatePath
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
@@ -18,15 +18,15 @@ Your job is to help users manage their inventory efficiently, keeping a welcomin
 ### Tone Guidelines:
 * Be conversational and clear. Instead of dry robotic answers, use phrases like "I'd be happy to check that for you!" or "All set! I've successfully added that to the system."
 
-* Keep track of the context to guide the user smoothly through warehouse operations..
-### Создание заказов:
-Когда юзер называет товары для заказа (даже неточно или с опечатками):
-1. СРАЗУ вызови getAllProductsByTenant — не спрашивай разрешения, делай это сам.
-2. Сопоставь слова юзера с товарами по бренду/типу, игнорируй мусорные слова. Пример: "монитор самсунг" → "Samsung 27\" 4K Monitor".
-3. При ОДНОЗНАЧНОМ совпадении используй товар сразу, НЕ переспрашивай.
-4. Переспрашивай ТОЛЬКО если товар не найден или совпадает несколько вариантов (например два "Модный ноутбук").
-5. Затем сразу вызови createOrder, передавая productId (НЕ название) и quantity.
-Если имя клиента (customerName) не названо — спроси его один раз, затем создавай заказ.`;
+* Keep track of the context to guide the user smoothly through warehouse operations.
+### Creating orders:
+When the user names products for an order (even loosely or with typos):
+1. IMMEDIATELY call getAllProductsByTenant — don't ask for permission, just do it.
+2. Match the user's words to products by brand/type, ignoring filler words. Example: "samsung monitor" → "Samsung 27\" 4K Monitor".
+3. On an UNAMBIGUOUS match, use the product right away — do NOT ask again.
+4. Ask again ONLY if the product isn't found or several options match (e.g. two "Premium Laptop"s).
+5. Then immediately call createOrder, passing the SKU (NOT the name) and quantity.
+If the customer name (customerName) wasn't provided, ask for it once, then create the order.`;
 
 export async function POST(req: Request) {
 
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
       try {
         if (!process.env.GEMINI_API_KEY) {
-          send("error", "GEMINI_API_KEY не задан в .env.local (и нужен рестарт сервера)");
+          send("error", "GEMINI_API_KEY is not set in .env.local (a server restart is required)");
           return;
         }
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         console.log("📨 messages:", messages?.length);
 
         if (!Array.isArray(messages) || messages.length === 0) {
-          send("error", "Empty msgs array");
+          send("error", "Messages array is empty");
           return;
         }
 
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         const userMessage = lastMessageObj?.parts?.[0]?.text ?? "";
 
         if (!userMessage.trim()) {
-          send("error", "Empty usr msg");
+          send("error", "User message is empty");
           return;
         }
 
@@ -78,13 +78,13 @@ export async function POST(req: Request) {
         for (let step = 0; step < MAX_STEPS; step++) {
           const calls = response.functionCalls ?? [];
 
-          // Модель больше не просит инструментов → это финальный ответ
+          // The model no longer requests tools → this is the final answer
           if (calls.length === 0) {
             send("text", response.text ?? "");
             break;
           }
 
-          // Выполняем все запрошенные на этом ходу инструменты
+          // Execute every tool requested on this turn
           const functionResponses = [];
           for (const call of calls) {
             if (!call.name) continue;
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
             try {
               toolResult = await executeTool(call.name, call.args);
             } catch (e) {
-              // Ошибку инструмента возвращаем модели, а не роняем стрим
+              // Return the tool error to the model instead of killing the stream
               toolResult = { error: e instanceof Error ? e.message : "tool failed" };
             }
 
@@ -110,11 +110,11 @@ export async function POST(req: Request) {
           revalidatePath("/inventory");
           revalidatePath("/orders");
 
-          // Возвращаем результаты модели и идём на следующий виток
+          // Send the results back to the model and continue to the next iteration
           response = await chat.sendMessage({ message: functionResponses });
 
           if (step === MAX_STEPS - 1) {
-            send("text", "Не смог завершить за отведённые шаги, уточни запрос, пожалуйста.");
+            send("text", "I couldn't finish within the allotted steps — please refine your request.");
           }
         }
       } catch (error: unknown) {
