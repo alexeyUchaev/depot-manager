@@ -13,7 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { ThemeToggle  } from "./theme-toggle"
-import { ArrowLeftRight, BarChart3, Building2, LayoutDashboard, Package, ShoppingCart, Users } from "lucide-react"
+import { ArrowLeftRight, BarChart3, Building2, LayoutDashboard, Package, PackagePlus, ShoppingCart, Users } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import logo from "@/app/icon.svg"
@@ -22,7 +22,7 @@ import { usePathname } from "next/navigation"
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },    
   { title: "Inventory", url: "/inventory", icon: Package },
-  { title: "Intake", url: "/intake", icon: ShoppingCart },
+  { title: "Intake", url: "/intake", icon: PackagePlus },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
   { title: "Movements", url: "/movements", icon: ArrowLeftRight },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
