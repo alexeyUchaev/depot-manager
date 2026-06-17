@@ -20,13 +20,15 @@ import logo from "@/app/icon.svg"
 import { usePathname } from "next/navigation"
 
 const items = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },    
+  { title: "Inventory", url: "/inventory", icon: Package },
+  { title: "Intake", url: "/intake", icon: ShoppingCart },
+  { title: "Orders", url: "/orders", icon: ShoppingCart },
+  { title: "Movements", url: "/movements", icon: ArrowLeftRight },
+  { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Company", url: "/company", icon: Building2 },
   { title: "Users", url: "/users", icon: Users },
-  { title: "Inventory", url: "/inventory", icon: Package },
-  { title: "Movements", url: "/movements", icon: ArrowLeftRight },
-  { title: "Orders", url: "/orders", icon: ShoppingCart },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+
 ];
 
 export function AppSidebar() {
