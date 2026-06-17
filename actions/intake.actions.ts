@@ -9,7 +9,7 @@ import { DEMO_TENANT_ID, DEMO_USER_ID } from '@/lib/constants'
 
 
 
-export async function getOrders(): Promise<ActionResult<IntakeDTO[]>> {
+export async function getIntakes(): Promise<ActionResult<IntakeDTO[]>> {
   try {
     const intakes = await intakeService.getAllIntakesByTenant(DEMO_TENANT_ID)
     return { success: true, data: intakes }
@@ -19,7 +19,7 @@ export async function getOrders(): Promise<ActionResult<IntakeDTO[]>> {
   }
 }
 
-export async function createOrder(data: {
+export async function createIntake(data: {
   customerName: string
   items: { id:string, sku: string; quantity: number; price: number }[]
 }): Promise<ActionResult<IntakeDTO>> {
@@ -33,7 +33,7 @@ export async function createOrder(data: {
   }
 }
 
-export async function updateOrderStatus(
+export async function updateIntakeStatus(
   id: string,
   status: 'REQUESTED' | 'ACCEPTED' | 'ARRIVED' | 'IN_TRANSIT' | 'REJECTED'
 ): Promise<ActionResult> {

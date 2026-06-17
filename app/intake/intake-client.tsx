@@ -70,7 +70,7 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
           <button key={intake.id} onClick={() => setSelected(intake)}
             className="w-full text-left bg-card border rounded-lg p-3 shadow-sm flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0 overflow-hidden">
-              <div className="font-mono text-xs font-bold text-foreground">{intake.orderNumber}</div>
+              <div className="font-mono text-xs font-bold text-foreground">{intake.intakeNuber}</div>
               <div className="text-sm text-muted-foreground mt-1">
                 {intake.customerName.length > 18 ? intake.customerName.slice(0, 18) + '…' : intake.customerName}
               </div>
@@ -100,7 +100,7 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
                 <tr key={intake.id} 
                   className="hover:bg-muted/50 transition-colors cursor-pointer">
                   <td className="px-6 py-4">
-                    <div className="font-mono text-xs font-bold text-foreground bg-muted border inline-block px-1.5 py-0.5 rounded">{intake.orderNumber}</div>
+                    <div className="font-mono text-xs font-bold text-foreground bg-muted border inline-block px-1.5 py-0.5 rounded">{intake.intakeNuber}</div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {new Date(intake.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </div>
@@ -135,7 +135,7 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
 
       {selected && (
         <DetailModal//localhost:3000/intakes
-          title={selected.orderNumber}
+          title={selected.intakeNuber}
           badges={<StatusBadge status={selected.status} />}
           rows={[
             { label: 'Customer', value: selected.customerName },
