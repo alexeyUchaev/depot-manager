@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { OrderDTO } from '@/services/order.service';
 import { DetailModal } from '@/components/detail-modal';
+import { DemoModal } from '@/components/demo-modal';
 
 function StatusBadge({ status }: { status: string }) {
   if (status === 'DELIVERED') return (
@@ -33,6 +34,7 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
   const [selected, setSelected] = useState<OrderDTO | null>(null);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <div className="p-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-foreground">
@@ -43,7 +45,7 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
             Manage outbound orders, pick lists, and shipment tracking.
           </p>
         </div>
-        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
+        <button onClick={() => setDemoOpen(true)} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
           <ShoppingCart className="h-4 w-4" /> Create Order
         </button>
       </div>
@@ -153,6 +155,8 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
           </div>
         </DetailModal>
       )}
+
+      {demoOpen && <DemoModal onClose={() => setDemoOpen(false)} />}
     </div>
   );
 }
