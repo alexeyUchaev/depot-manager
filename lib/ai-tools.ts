@@ -33,6 +33,10 @@ export const depotTools: FunctionDeclaration[] = [
     description: "Получить список всех заказов тенанта (номер, клиент, статус, позиции, сумма).",
   },
   {
+    name: "getAllIntakesByTenant",
+    description: "Получить список всех заказов Intakes (номер, клиент, статус, позиции, сумма).",
+  },
+  {
     name: "createOrder",
     description:
       "Создать заказ. ВАЖНО: сначала вызови getAllProductsByTenant, найди товары " +

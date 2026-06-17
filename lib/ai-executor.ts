@@ -1,6 +1,7 @@
 import * as services from "@/services";
 import { DEMO_TENANT_ID, DEMO_USER_ID } from "./constants";
 import { analyticsService } from "@/services/analytics.service";
+import { intakeService } from "@/services/intake.service";
 export async function executeTool(name: string, args: any) {
   const tenantId = DEMO_TENANT_ID;
   const userId = DEMO_USER_ID;
@@ -21,6 +22,9 @@ export async function executeTool(name: string, args: any) {
 
     case "getAllByTenant":
       return await services.orderService.getAllByTenant(tenantId);
+
+    case "getAllIntakesByTenant":
+    return await intakeService.getAllIntakesByTenant(tenantId);
 
     case "createOrder": {
       const items = [];
