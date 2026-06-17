@@ -24,7 +24,7 @@ export type IntakeDTO = {
 export const orderService = {
 
   async getAllIntakesByTenant(tenantId: string): Promise<IntakeDTO[]> {
-    const orders = await prisma.order.findMany({
+    const intakes = await prisma.intake.findMany({
       where: { orgId: tenantId },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -41,23 +41,23 @@ export const orderService = {
       },
     })
 
-    return orders.map((order) => ({
-      id: order.id,
-      orderNumber: order.orderNumber,
-      customerName: order.customerName,
-      status: order.status,
-      createdAt: order.createdAt,
-      items: order.items.map((item) => ({
+    return intakes.map((intake) => ({
+      id: intake.id,
+      orderNumber: intake.orderNumber,
+      customerName: intake.customerName,
+      status: intake.status,
+      createdAt: intake.createdAt,
+      items: intake.items.map((item) => ({
         id: item.id,
         quantity: item.quantity,
         price: Number(item.price),
         product: item.product,
       })),
-      total: order.items.reduce(
+      total: intake.items.reduce(
         (sum, item) => sum + Number(item.price) * item.quantity,
         0
       ),
-      assignedTo: [order.user.firstName, order.user.lastName]
+      assignedTo: [intake.user.firstName, intake.user.lastName]
         .filter(Boolean)
         .join(' '),
     }))
@@ -72,10 +72,10 @@ export const orderService = {
     }
   ): Promise<ActionResult<IntakeDTO>> {
     try {
-      const count = await prisma.order.count({ where: { orgId: tenantId } })
-      const orderNumber = `ORD-${String(count + 1).padStart(4, '0')}`
+      const count = await prisma.intake.count({ where: { orgId: tenantId } })
+      const intakeNumber = `ORD-${String(count + 1).padStart(4, '0')}`
 
-      const order = await prisma.$transaction(async (tx) => {
+      const intake = await prisma.$transaction(async (tx) => {
         for (const item of data.items) {
           const product = await tx.product.findFirst({
             where: { sku: item.sku, orgId: tenantId },
@@ -86,14 +86,13 @@ export const orderService = {
           }
         }
 
-        // Создаём заказ
-        const newOrder = await tx.order.create({
+        const newIntake = await tx.intake.create({
           data: {
             orgId: tenantId,
             userId,
-            orderNumber,
+            intakeNumber,
             customerName: data.customerName,
-            status: 'PENDING',
+            status: 'REQUESTED',
             items: {
               create: data.items.map((item) => ({
                 productId: item.id,
@@ -117,35 +116,35 @@ export const orderService = {
         for (const item of data.items) {
           await postMovement(tx, tenantId, userId, {
             productId: item.id,
-            type: 'OUT',
+            type: 'IN',
             signedQuantity: -item.quantity,
-            reason: `Order ${newOrder.orderNumber}`,
-            orderId: newOrder.id,
+            reason: `Intake ${newIntake.intakeNumber}`,
+            orderId: newIntake.id,
           })
         }
 
-        return newOrder
+        return newIntake
       })
 
       return {
         success: true,
         data: {
-          id: order.id,
-          orderNumber: order.orderNumber,
-          customerName: order.customerName,
-          status: order.status,
-          createdAt: order.createdAt,
-          items: order.items.map((item) => ({
+          id: intake.id,
+          orderNumber: intake.intakeNumber,
+          customerName: intake.customerName,
+          status: intake.status,
+          createdAt: intake.createdAt,
+          items: intake.items.map((item) => ({
             id: item.id,
             quantity: item.quantity,
             price: Number(item.price),
             product: item.product,
           })),
-          total: order.items.reduce(
+          total: intake.items.reduce(
             (sum, item) => sum + Number(item.price) * item.quantity,
             0
           ),
-          assignedTo: [order.user.firstName, order.user.lastName]
+          assignedTo: [intake.user.firstName, intake.user.lastName]
             .filter(Boolean)
             .join(' '),
         },
@@ -159,22 +158,22 @@ export const orderService = {
   async updateStatus(
     id: string,
     tenantId: string,
-    status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED'
+    status: 'REQUESTED' | 'ACCEPTED' | 'ARRIVED' | 'IN_TRANSIT' | 'REJECTED'
   ): Promise<ActionResult> {
     try {
-      const existing = await prisma.order.findFirst({
+      const existing = await prisma.intake.findFirst({
         where: { id, orgId: tenantId },
       })
-      if (!existing) return { success: false, error: 'Order not found' }
+      if (!existing) return { success: false, error: 'Intake not found' }
 
-      await prisma.order.update({
+      await prisma.intake.update({
         where: { id },
         data: { status },
       })
 
       return { success: true, data: undefined }
     } catch {
-      return { success: false, error: 'Failed to update order' }
+      return { success: false, error: 'Failed to update intake' }
     }
   },
 }

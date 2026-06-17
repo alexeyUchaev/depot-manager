@@ -9,24 +9,29 @@ import type { IntakeDTO } from '@/services/intake.service';
 import { DetailModal } from '@/components/detail-modal';
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === 'DELIVERED') return (
+  if (status === 'IN_TRANSIT') return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium  bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-900">
-      <CheckCircle2 className="h-3 w-3" /> Delivered
+      <CheckCircle2 className="h-3 w-3" /> IN TRANSIT
     </span>
   );
-  if (status === 'SHIPPED') return (
+  if (status === 'ARRIVED') return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-900">
-      <Truck className="h-3 w-3" /> Shipped
+      <Truck className="h-3 w-3" /> ARRIVED
     </span>
   );
-  if (status === 'PROCESSING') return (
+  if (status === 'ACCEPTED') return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900">
-      <Clock className="h-3 w-3" /> Processing
+      <Clock className="h-3 w-3" /> ACCEPTED
+    </span>
+  );
+  if (status === 'REJECTED') return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900">
+      <Clock className="h-3 w-3" /> REJECTED
     </span>
   );
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
-      <Package className="h-3 w-3" /> Pending
+      <Package className="h-3 w-3" /> Requested
     </span>
   );
 }
