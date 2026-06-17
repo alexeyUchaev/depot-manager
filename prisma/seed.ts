@@ -148,29 +148,10 @@ async function main() {
   ])
   console.log('✅ Products created')
 
-  // Opening stock — every unit of stock enters via an IN movement (goods receipt).
-  // Ledger quantities are SIGNED: IN => positive.
-  await Promise.all([
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[0].id, userId: manager1.id, type: 'IN', quantity: 32, reason: 'Opening stock — PO-2026-089' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[1].id, userId: manager1.id, type: 'IN', quantity: 40, reason: 'Opening stock' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[2].id, userId: manager2.id, type: 'IN', quantity: 18, reason: 'Opening stock' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[3].id, userId: owner.id, type: 'IN', quantity: 6, reason: 'Opening stock' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[4].id, userId: manager1.id, type: 'IN', quantity: 15, reason: 'Opening stock — PO-2026-081' },
-    }),
-  ])
+
   console.log('✅ Opening stock (IN) created')
 
-  // Orders — each is a document. Its lines dispatch stock via OUT movements
-  // (negative, linked back to the order through orderId).
+
   const order1 = await prisma.order.create({
     data: {
       orgId: tenant.id,
@@ -230,29 +211,71 @@ async function main() {
   })
   console.log('✅ Orders created')
 
-  // OUT movements for every order line (signed negative), linked to the order.
-  await Promise.all([
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[0].id, userId: staff1.id, orderId: order1.id, type: 'OUT', quantity: -5, reason: 'Order ORD-1021' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[2].id, userId: staff1.id, orderId: order1.id, type: 'OUT', quantity: -10, reason: 'Order ORD-1021' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[1].id, userId: manager1.id, orderId: order2.id, type: 'OUT', quantity: -8, reason: 'Order ORD-1020' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[0].id, userId: staff1.id, orderId: order3.id, type: 'OUT', quantity: -3, reason: 'Order ORD-1019' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[3].id, userId: staff1.id, orderId: order3.id, type: 'OUT', quantity: -3, reason: 'Order ORD-1019' },
-    }),
-    prisma.stockMovement.create({
-      data: { orgId: tenant.id, productId: products[1].id, userId: manager1.id, orderId: order4.id, type: 'OUT', quantity: -20, reason: 'Order ORD-1018' },
-    }),
-  ])
+  const intake1 = await prisma.intake.create({
+    data: {
+      orgId: tenant.id,
+      userId: staff1.id,
+      intakeNumber: 'ITK-1021',
+      customerName: 'TechMart Wholesale',
+      status: 'REQUESTED',
+      items: {
+        create: [
+          { productId: products[0].id, quantity: 5, price: 1299.0 },
+          { productId: products[2].id, quantity: 10, price: 999.0 },
+        ],
+      },
+    },
+  })
 
-  console.log('✅ Stock movements (OUT / ADJUSTMENT) created')
+  const intake2 = await prisma.intake.create({
+    data: {
+      orgId: tenant.id,
+      userId: staff1.id,
+      intakeNumber: 'ITK-1021',
+      customerName: 'TechMart Wholesale',
+      status: 'REQUESTED',
+      items: {
+        create: [
+          { productId: products[0].id, quantity: 5, price: 1299.0 },
+          { productId: products[2].id, quantity: 10, price: 999.0 },
+        ],
+      },
+    },
+  })
+
+  const intake3 = await prisma.intake.create({
+    data: {
+      orgId: tenant.id,
+      userId: staff1.id,
+      intakeNumber: 'ITK-1021',
+      customerName: 'TechMart Wholesale',
+      status: 'REQUESTED',
+      items: {
+        create: [
+          { productId: products[0].id, quantity: 5, price: 1299.0 },
+          { productId: products[2].id, quantity: 10, price: 999.0 },
+        ],
+      },
+    },
+  })
+
+  const intake4 = await prisma.intake.create({
+    data: {
+      orgId: tenant.id,
+      userId: staff1.id,
+      intakeNumber: 'ITK-1021',
+      customerName: 'TechMart Wholesale',
+      status: 'REQUESTED',
+      items: {
+        create: [
+          { productId: products[0].id, quantity: 5, price: 1299.0 },
+          { productId: products[2].id, quantity: 10, price: 999.0 },
+        ],
+      },
+    },
+  })
+
+  console.log('✅ InTakes created')
 
 
   // Rebuild the cachedQuantity projection from the ledger (single source of truth).
