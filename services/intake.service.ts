@@ -4,7 +4,7 @@ import { postMovement } from './stock.service'
 
 export type IntakeDTO = {
   id: string
-  intakeNuber: string
+  intakeNumber: string
   customerName: string
   status: string
   createdAt: Date
@@ -43,7 +43,7 @@ export const intakeService = {
 
     return intakes.map((intake) => ({
       id: intake.id,
-      intakeNuber: intake.intakeNumber,
+      intakeNumber: intake.intakeNumber,
       customerName: intake.customerName,
       status: intake.status,
       createdAt: intake.createdAt,
@@ -73,17 +73,16 @@ export const intakeService = {
   ): Promise<ActionResult<IntakeDTO>> {
     try {
       const count = await prisma.intake.count({ where: { orgId: tenantId } })
-      const intakeNumber = `ORD-${String(count + 1).padStart(4, '0')}`
+      const intakeNumber = `INT-${String(count + 1).padStart(4, '0')}`
 
       const intake = await prisma.$transaction(async (tx) => {
+        // An intake RECEIVES goods — we only need the product to exist.
+        // There's no "enough stock" requirement here (that's for outbound orders).
         for (const item of data.items) {
           const product = await tx.product.findFirst({
             where: { sku: item.sku, orgId: tenantId },
           })
           if (!product) throw new Error(`Product not found`)
-          if (product.cachedQuantity < item.quantity) {
-            throw new Error(`Not enough stock for ${product.name}`)
-          }
         }
 
         const newIntake = await tx.intake.create({
@@ -111,15 +110,15 @@ export const intakeService = {
           },
         })
 
-        // Each order line dispatches stock => an OUT movement in the ledger
+        // Each intake line receives stock => an IN movement in the ledger
         // (the single source of truth), which also updates the cached stock.
         for (const item of data.items) {
           await postMovement(tx, tenantId, userId, {
             productId: item.id,
             type: 'IN',
-            signedQuantity: -item.quantity,
+            signedQuantity: item.quantity,
             reason: `Intake ${newIntake.intakeNumber}`,
-            orderId: newIntake.id,
+            takeId: newIntake.id,
           })
         }
 
@@ -130,7 +129,7 @@ export const intakeService = {
         success: true,
         data: {
           id: intake.id,
-          intakeNuber: intake.intakeNumber,
+          intakeNumber: intake.intakeNumber,
           customerName: intake.customerName,
           status: intake.status,
           createdAt: intake.createdAt,

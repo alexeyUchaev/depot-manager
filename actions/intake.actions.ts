@@ -25,7 +25,10 @@ export async function createIntake(data: {
 }): Promise<ActionResult<IntakeDTO>> {
   try {
     const result = await intakeService.create(DEMO_TENANT_ID, DEMO_USER_ID, data)
-    if (result.success) revalidatePath('/orders')
+    if (result.success) {
+      revalidatePath('/intake')
+      revalidatePath('/inventory')
+    }
     return result
   } catch (e: unknown) {
     const error = e instanceof Error ? e.message : 'Unknown error'
@@ -39,7 +42,7 @@ export async function updateIntakeStatus(
 ): Promise<ActionResult> {
   try {
     const result = await intakeService.updateStatus(id, DEMO_TENANT_ID, status)
-    if (result.success) revalidatePath('/orders')
+    if (result.success) revalidatePath('/intake')
     return result
   } catch (e: unknown) {
     const error = e instanceof Error ? e.message : 'Unknown error'
