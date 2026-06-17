@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { ProductDTO } from '@/services/product.service';
 import { DetailModal } from '@/components/detail-modal';
+import { DemoModal } from '@/components/demo-modal';
 
 function StatusBadge({ status, quantity }: { status: string; quantity: number }) {
   if (status === 'In Stock') return (
@@ -28,6 +29,7 @@ function StatusBadge({ status, quantity }: { status: string; quantity: number })
 
 export default function InventoryClient({ products }: { products: ProductDTO[] }) {
   const [selected, setSelected] = useState<ProductDTO | null>(null);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <div className="p-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-foreground">
@@ -38,7 +40,7 @@ export default function InventoryClient({ products }: { products: ProductDTO[] }
             Track products, stock levels, warehouse locations, and reorder alerts.
           </p>
         </div>
-        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
+        <button onClick={() => setDemoOpen(true)} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
           <Plus className="h-4 w-4" /> Add Product
         </button>
       </div>
@@ -133,6 +135,8 @@ export default function InventoryClient({ products }: { products: ProductDTO[] }
           onClose={() => setSelected(null)}
         />
       )}
+
+      {demoOpen && <DemoModal onClose={() => setDemoOpen(false)} />}
     </div>
   );
 }

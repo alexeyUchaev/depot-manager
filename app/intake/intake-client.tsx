@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { IntakeDTO } from '@/services/intake.service';
 import { DetailModal } from '@/components/detail-modal';
+import { DemoModal } from '@/components/demo-modal';
 
 function StatusBadge({ status }: { status: string }) {
   if (status === 'IN_TRANSIT') return (
@@ -38,6 +39,7 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
   const [selected, setSelected] = useState<IntakeDTO | null>(null);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <div className="p-2 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-foreground">
@@ -48,7 +50,7 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
             Manage outbound intakes, pick lists, and shipment tracking.
           </p>
         </div>
-        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
+        <button onClick={() => setDemoOpen(true)} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
           <PackagePlus className="h-4 w-4" /> Create Intake
         </button>
       </div>
@@ -158,6 +160,8 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
           </div>
         </DetailModal>
       )}
+
+      {demoOpen && <DemoModal onClose={() => setDemoOpen(false)} />}
     </div>
   );
 }
