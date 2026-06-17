@@ -17,6 +17,7 @@ type PostMovementInput = {
   signedQuantity: number
   reason?: string
   orderId?: string
+  takeId?: string
 }
 
 /** Create a ledger movement AND increment the cached stock, atomically. */
@@ -32,6 +33,7 @@ export async function postMovement(
       productId: input.productId,
       userId,
       orderId: input.orderId,
+      takeId: input.takeId,
       type: input.type,
       quantity: input.signedQuantity,
       reason: input.reason,
