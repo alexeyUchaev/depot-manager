@@ -13,7 +13,11 @@ const secretKey = process.env.STRIPE_SECRET_KEY
 
 export const stripe =
   globalForStripe.stripe ??
-  new Stripe(secretKey ?? '', {
+  // Fall back to a non-empty placeholder when STRIPE_SECRET_KEY is unset so the
+  // constructor doesn't throw at import time (e.g. during `next build`, which
+  // evaluates route modules without runtime env). Any real API call is guarded
+  // by assertStripeConfigured() and will fail loudly if the key is missing.
+  new Stripe(secretKey ?? 'sk_test_unconfigured_placeholder', {
     // Pin nothing here on purpose: the account's default API version is used,
     // which keeps webhook payload shapes consistent with the dashboard.
     appInfo: { name: 'depot-manager' },
