@@ -12,7 +12,7 @@ import { DemoModal } from '@/components/demo-modal';
 function StatusBadge({ status }: { status: string }) {
   if (status === 'IN_TRANSIT') return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-900">
-      <Truck className="h-3 w-3" /> IN TRANSIT
+      <Truck className="h-3 w-3" /> Shipped
     </span>
   );
   if (status === 'ARRIVED') return (
@@ -32,7 +32,7 @@ function StatusBadge({ status }: { status: string }) {
   );
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
-      <Clock className="h-3 w-3" /> Requested
+      <Clock className="h-3 w-3" /> Pending
     </span>
   );
 }
