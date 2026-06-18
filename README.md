@@ -77,7 +77,7 @@ _Add a dashboard screenshot and a short GIF of the AI assistant placing an order
 
 ```bash
 # 1. Install dependencies
-npm install
+npm install 
 
 # 2. Configure environment
 cp .env.example .env   # then fill in DATABASE_URL and GEMINI_API_KEY
