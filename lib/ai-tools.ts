@@ -41,7 +41,10 @@ export const depotTools: FunctionDeclaration[] = [
     description:
       "Create an order. IMPORTANT: first call getAllProductsByTenant, match the " +
       "products by name, take their exact SKUs and check there is enough stock. " +
-      "Pass the SKU (NOT the name) to createOrder. Never invent a SKU.",
+      "Pass the SKU (NOT the name) to createOrder. Never invent a SKU. " +
+      "The order is created in AWAITING_PAYMENT status and stock is NOT dispatched " +
+      "yet — the customer must pay first. To collect payment, call " +
+      "createOrderCheckout with the returned order id to get a Stripe payment link.",
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -60,6 +63,21 @@ export const depotTools: FunctionDeclaration[] = [
         },
       },
       required: ["customerName", "products"],
+    },
+  },
+  {
+    name: "createOrderCheckout",
+    description:
+      "Create a Stripe Checkout payment link for an existing unpaid order. " +
+      "Returns a hosted URL the customer can open to pay. Use the order id " +
+      "(NOT the order number) from createOrder or getAllByTenant. Once the " +
+      "payment succeeds the order is marked paid and its stock is dispatched.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        orderId: { type: Type.STRING, description: "Order id from createOrder or getAllByTenant" },
+      },
+      required: ["orderId"],
     },
   },
   {
