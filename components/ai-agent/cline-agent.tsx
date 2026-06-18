@@ -1,7 +1,7 @@
 'use client';
 import { CgToggleSquare, CgToggleSquareOff } from "react-icons/cg";
 import { useEffect, useRef, useState } from "react";
-import AiTextArea from "./ai-text-area";
+import AiTextArea, { type ChatAttachment } from "./ai-text-area";
 import { MessageText } from "./message-text";
 
 type Message = { role: 'user' | 'ai'; text: string };
@@ -10,8 +10,52 @@ export function ClineAgent() {
   const [toggle, setToggle] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Upload each picked file to the DB-backed endpoint; keep its id for sending.
+  const handleAttach = async (files: FileList) => {
+    const picked = Array.from(files);
+    const startIndex = attachments.length;
+    setAttachments((prev) => [
+      ...prev,
+      ...picked.map((f) => ({
+        filename: f.name,
+        mimeType: f.type,
+        uploading: true,
+      })),
+    ]);
+
+    await Promise.all(
+      picked.map(async (file, i) => {
+        const index = startIndex + i;
+        try {
+          const form = new FormData();
+          form.append("file", file);
+          const res = await fetch("/api/chat/attachments", { method: "POST", body: form });
+          const json = await res.json();
+          setAttachments((prev) => {
+            const next = [...prev];
+            if (!next[index]) return prev;
+            next[index] = res.ok
+              ? { ...next[index], id: json.id, uploading: false }
+              : { ...next[index], uploading: false, error: json.error || "Upload failed" };
+            return next;
+          });
+        } catch {
+          setAttachments((prev) => {
+            const next = [...prev];
+            if (next[index]) next[index] = { ...next[index], uploading: false, error: "Upload failed" };
+            return next;
+          });
+        }
+      })
+    );
+  };
+
+  const removeAttachment = (index: number) =>
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -30,23 +74,34 @@ export function ClineAgent() {
 
   const handleSendMessage = async () => {
     const text = inputText.trim();
-    if (!text || isLoading) return;
+    const ready = attachments.filter((a) => a.id && !a.error);
+    if ((!text && ready.length === 0) || isLoading) return;
+    if (attachments.some((a) => a.uploading)) return; // wait for uploads
 
-    const userMsg: Message = { role: 'user', text };
-    const payloadMessages = [...messages, userMsg].map((m) => ({
+    const attachmentNote = ready.length
+      ? `📎 ${ready.map((a) => a.filename).join(', ')}`
+      : '';
+    const displayText = [text, attachmentNote].filter(Boolean).join('\n');
+
+    const userMsg: Message = { role: 'user', text: displayText };
+    const payloadMessages = [...messages, { role: 'user' as const, text }].map((m) => ({
       role: m.role === 'user' ? 'user' : 'model',
       parts: [{ text: m.text }],
     }));
 
     setMessages((prev) => [...prev, userMsg, { role: 'ai', text: "Thinking..." }]);
     setInputText("");
+    setAttachments([]);
     setIsLoading(true);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: payloadMessages }),
+        body: JSON.stringify({
+          messages: payloadMessages,
+          attachments: ready.map((a) => ({ id: a.id })),
+        }),
       });
 
       if (!response.ok || !response.body) {
@@ -151,7 +206,15 @@ export function ClineAgent() {
                   </div>
                 ))}
               </div>
-              <AiTextArea value={inputText} onChange={(e) => setInputText(e.target.value)} onSend={handleSendMessage} disabled={isLoading} />
+              <AiTextArea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onSend={handleSendMessage}
+                disabled={isLoading}
+                attachments={attachments}
+                onAttach={handleAttach}
+                onRemoveAttachment={removeAttachment}
+              />
             </div>
           </div>
         )}
