@@ -7,13 +7,16 @@ datasource db {
 }
 
 model Tenant {
-  id               String   @id @default(cuid())
-  name             String
-  slug             String   @unique
-  clerkOrgId       String   @unique
-  plan             Plan     @default(FREE)
-  stripeCustomerId String?
-  createdAt        DateTime @default(now())
+  id                   String    @id @default(cuid())
+  name                 String
+  slug                 String    @unique
+  clerkOrgId           String    @unique
+  plan                 Plan      @default(FREE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?   @unique
+  subscriptionStatus   String? // active / past_due / canceled / incomplete ...
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
 
   users     User[]
   products  Product[]
@@ -87,8 +90,17 @@ model Order {
   userId       String
   orderNumber  String
   customerName String
-  status       OrderStatus @default(PENDING)
+  status       OrderStatus @default(AWAITING_PAYMENT)
   createdAt    DateTime    @default(now())
+
+  // Stripe payment tracking. Stock (OUT movements) is only dispatched once the
+  // order is actually paid (handled in the Stripe webhook), so an unpaid order
+  // never silently consumes inventory.
+  stripeCheckoutSessionId String?   @unique
+  stripePaymentIntentId   String?   @unique
+  paidAt                  DateTime?
+  amountTotal             Int? // amount charged, in the smallest currency unit (cents)
+  currency                String?   @default("usd")
 
   org       Tenant @relation(fields: [orgId], references: [id])
   user      User         @relation(fields: [userId], references: [id])
@@ -154,16 +166,26 @@ enum MovementType {
 }
 
 enum OrderStatus {
+  AWAITING_PAYMENT
   PENDING
   PROCESSING
   SHIPPED
   DELIVERED
+  CANCELLED
 }
 
 enum IntakeStatus {
-  REQUESTED       
-  IN_TRANSIT      
-  ARRIVED         
-  ACCEPTED        
-  REJECTED        
+  REQUESTED
+  IN_TRANSIT
+  ARRIVED
+  ACCEPTED
+  REJECTED
+}
+
+// Stripe delivers webhook events at-least-once, so the handler must be
+// idempotent. We record every processed event id here and skip duplicates.
+model ProcessedStripeEvent {
+  id          String   @id // Stripe event.id
+  type        String
+  processedAt DateTime @default(now())
 }
