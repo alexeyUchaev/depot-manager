@@ -61,8 +61,6 @@ export const movementService = {
       })
       if (!product) return { success: false, error: 'Product not found' }
 
-      // The ledger stores a SIGNED effect on stock: IN => +q, OUT => -q.
-      // Every stock change is a directional document — no special adjustments.
       const magnitude = Math.abs(data.quantity)
       const signedQuantity = data.type === 'IN' ? magnitude : -magnitude
 

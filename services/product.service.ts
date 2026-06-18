@@ -27,7 +27,6 @@ const toDTO = (product: {
   lowStockAt: number
   createdAt: Date
 }): ProductDTO => {
-  // quantity exposed to the app = the cached projection of the ledger.
   const quantity = product.cachedQuantity
   return {
     id: product.id,

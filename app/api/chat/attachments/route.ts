@@ -3,7 +3,6 @@ import { DEMO_TENANT_ID, DEMO_USER_ID } from "@/lib/constants";
 
 export const runtime = "nodejs";
 
-// Gemini accepts images and PDFs as inline multimodal input.
 const ALLOWED_TYPES = [
   "image/png",
   "image/jpeg",

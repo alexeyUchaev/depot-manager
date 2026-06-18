@@ -76,8 +76,6 @@ export const intakeService = {
       const intakeNumber = `ITK-${1000 + count + 1}`
 
       const intake = await prisma.$transaction(async (tx) => {
-        // An intake RECEIVES goods — we only need the product to exist.
-        // There's no "enough stock" requirement here (that's for outbound orders).
         for (const item of data.items) {
           const product = await tx.product.findFirst({
             where: { sku: item.sku, orgId: tenantId },
@@ -110,8 +108,6 @@ export const intakeService = {
           },
         })
 
-        // Each intake line receives stock => an IN movement in the ledger
-        // (the single source of truth), which also updates the cached stock.
         for (const item of data.items) {
           await postMovement(tx, tenantId, userId, {
             productId: item.id,

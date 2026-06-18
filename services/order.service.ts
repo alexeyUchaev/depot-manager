@@ -86,10 +86,6 @@ export const orderService = {
           }
         }
 
-        // Create the order in AWAITING_PAYMENT. Stock is NOT dispatched here:
-        // the OUT movements are posted later by finalizePaidOrder(), once Stripe
-        // confirms the payment via webhook. We still validated availability
-        // above so we never create an order for goods we don't have.
         const newOrder = await tx.order.create({
           data: {
             orgId: tenantId,
@@ -198,7 +194,6 @@ export const orderService = {
         })
         if (!order) throw new Error('Order not found')
 
-        // Already finalized — duplicate webhook delivery. Do nothing.
         if (order.paidAt) return
 
         for (const item of order.items) {
@@ -207,8 +202,6 @@ export const orderService = {
           })
           if (!product) throw new Error('Product not found')
           if (product.cachedQuantity < item.quantity) {
-            // Paid but no stock: keep the payment, flag the order for manual
-            // handling/refund rather than going negative on inventory.
             throw new Error(`Not enough stock for ${product.name}`)
           }
         }

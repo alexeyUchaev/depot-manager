@@ -135,7 +135,6 @@ export const analyticsService = {
       where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
     })
 
-    // Ledger quantities are signed (OUT is negative) — use magnitudes here.
     const inUnits = movements.filter(m => m.type === 'IN').reduce((s, m) => s + Math.abs(m.quantity), 0)
     const outUnits = movements.filter(m => m.type === 'OUT').reduce((s, m) => s + Math.abs(m.quantity), 0)
 
