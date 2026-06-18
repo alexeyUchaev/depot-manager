@@ -2,6 +2,7 @@ import * as services from "@/services";
 import { DEMO_TENANT_ID, DEMO_USER_ID } from "./constants";
 import { analyticsService } from "@/services/analytics.service";
 import { intakeService } from "@/services/intake.service";
+import { paymentService } from "@/services/payment.service";
 export async function executeTool(name: string, args: any) {
   const tenantId = DEMO_TENANT_ID;
   const userId = DEMO_USER_ID;
@@ -41,11 +42,36 @@ export async function executeTool(name: string, args: any) {
         });
       }
 
-      return await services.orderService.create(tenantId, userId, {
+      const created = await services.orderService.create(tenantId, userId, {
         customerName: args.customerName,
         items,
       });
+
+      // The order is created in AWAITING_PAYMENT. Try to attach a Stripe
+      // payment link right away so it can be returned to the chat. A checkout
+      // failure (e.g. Stripe not configured) must NOT fail the order itself —
+      // the order exists and a link can be generated later via
+      // createOrderCheckout. We surface the reason instead.
+      if (created.success && created.data) {
+        const checkout = await paymentService.createOrderCheckoutSession(
+          tenantId,
+          created.data.id
+        );
+        return {
+          ...created,
+          data: {
+            ...created.data,
+            checkoutUrl: checkout.success ? checkout.data.url : null,
+            checkoutError: checkout.success ? undefined : checkout.error,
+          },
+        };
+      }
+
+      return created;
     }
+    case "createOrderCheckout":
+      return await paymentService.createOrderCheckoutSession(tenantId, args.orderId);
+
     case "getAnalytics":
     return await analyticsService.getAnalytics(tenantId)
 
