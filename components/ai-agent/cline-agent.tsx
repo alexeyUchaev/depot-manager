@@ -14,7 +14,6 @@ export function ClineAgent() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Upload each picked file to the DB-backed endpoint; keep its id for sending.
   const handleAttach = async (files: FileList) => {
     const picked = Array.from(files);
     const startIndex = attachments.length;
@@ -114,8 +113,6 @@ export function ClineAgent() {
       const decoder = new TextDecoder();
       let buffer = "";
 
-      // Compose the assistant message from independent pieces so a tool status
-      // never clobbers the final answer and the payment link always shows.
       let answer = "";
       let toolStatus = "";
       let paymentLink = "";

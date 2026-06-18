@@ -47,11 +47,6 @@ export async function executeTool(name: string, args: any) {
         items,
       });
 
-      // The order is created in AWAITING_PAYMENT. Try to attach a Stripe
-      // payment link right away so it can be returned to the chat. A checkout
-      // failure (e.g. Stripe not configured) must NOT fail the order itself —
-      // the order exists and a link can be generated later via
-      // createOrderCheckout. We surface the reason instead.
       if (created.success && created.data) {
         const checkout = await paymentService.createOrderCheckoutSession(
           tenantId,

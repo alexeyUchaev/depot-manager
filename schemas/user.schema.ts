@@ -1,4 +1,3 @@
-// schemas/user.schema.ts
 import { z } from 'zod'
 import { UserRole } from '@prisma/client'
 

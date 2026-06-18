@@ -1,7 +1,5 @@
-// lib/ai-tools.ts
 import { Type, type FunctionDeclaration } from "@google/genai";
 
-// IMPORTANT: tool names must match the cases in lib/ai-executor.ts
 export const depotTools: FunctionDeclaration[] = [
   {
     name: "getAllProductsByTenant",
