@@ -34,7 +34,6 @@ export const paymentService = {
         quantity: item.quantity,
         price_data: {
           currency,
-          // Stripe expects the smallest currency unit (cents).
           unit_amount: Math.round(Number(item.price) * 100),
           product_data: {
             name: item.product.name,
@@ -46,7 +45,6 @@ export const paymentService = {
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
         line_items,
-        // The webhook trusts these to know which order to finalize.
         client_reference_id: order.id,
         metadata: { kind: 'order', orderId: order.id, tenantId },
         success_url: `${appBaseUrl()}/orders?paid=1&order=${order.id}`,
@@ -153,7 +151,6 @@ export const paymentService = {
             currency: session.currency,
           })
         }
-        // Subscription checkouts are reflected by customer.subscription.* events.
         break
       }
 
@@ -174,7 +171,6 @@ export const paymentService = {
       }
 
       default:
-        // Unhandled event types are acknowledged and ignored.
         break
     }
 
