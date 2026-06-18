@@ -135,8 +135,8 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
         </div>
       </div>
 
-      {selected && (
-        <DetailModal//localhost:3000/intakes
+        {selected && (
+        <DetailModal
           title={selected.intakeNumber}
           badges={<StatusBadge status={selected.status} />}
           rows={[

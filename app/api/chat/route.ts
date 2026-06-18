@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { revalidatePath } from "next/cache";
 import { depotTools } from "@/lib/ai-tools";
-import { executeTool } from "@/lib/ai-executor";
+import { executeTool, ToolArgs } from "@/lib/ai-executor";
 import { prisma } from "@/lib/prisma";
 import { DEMO_TENANT_ID } from "@/lib/constants";
 
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
 
             let toolResult: unknown;
             try {
-              toolResult = await executeTool(call.name, call.args);
+              toolResult = await executeTool(call.name, (call.args ?? {}) as unknown as ToolArgs);
             } catch (e) {
               toolResult = { error: e instanceof Error ? e.message : "tool failed" };
             }

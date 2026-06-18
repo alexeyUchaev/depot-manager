@@ -130,8 +130,8 @@ export default function OrdersClient({ orders }: { orders: OrderDTO[] }) {
         </div>
       </div>
 
-      {selected && (
-        <DetailModal//localhost:3000/orders
+        {selected && (
+        <DetailModal
           title={selected.orderNumber}
           badges={<StatusBadge status={selected.status} />}
           rows={[

@@ -142,7 +142,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
           const dataStr = line.slice(6).trim()
           if (dataStr === '[DONE]') continue
 
-          let data: { type: string; content: any }
+          let data: { type: 'text'; content: string } | { type: 'tool_call'; content: { tool?: string } } | { type: 'payment_link'; content: { url: string } } | { type: 'error'; content: string }
           try {
             data = JSON.parse(dataStr)
           } catch (parseError) {
