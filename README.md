@@ -36,7 +36,7 @@ everything is created through the AI assistant. Try:
 - 📋 **Orders** — outbound orders with a status workflow
 - 🔁 **Stock Movements** — full audit log of every inventory change (IN/OUT) with user & reason
 - 📈 **Analytics** — revenue, inventory valuation, top products, monthly trend, low-stock list
-- 👥 **Users & Company** — role-based access (Owner, Manager, Staff)
+- 👥 **Users & Company** — role-based access (Owner, Manager, Staff) STRIPE
 
 ## Tech Stack
 
