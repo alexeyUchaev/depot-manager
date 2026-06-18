@@ -164,6 +164,21 @@ const productDefs: ProductDef[] = [
 async function main() {
   console.log('🌱 Seeding database (Industrial Fasteners / MRO)...')
 
+  // Make the seed idempotent: wipe existing rows first so re-running it doesn't
+  // fail on unique constraints (e.g. the demo tenant/users). Delete children
+  // before parents to respect foreign keys.
+  await prisma.stockMovement.deleteMany()
+  await prisma.orderItem.deleteMany()
+  await prisma.intakeItem.deleteMany()
+  await prisma.order.deleteMany()
+  await prisma.intake.deleteMany()
+  await prisma.product.deleteMany()
+  await prisma.chatAttachment.deleteMany()
+  await prisma.processedStripeEvent.deleteMany()
+  await prisma.user.deleteMany()
+  await prisma.tenant.deleteMany()
+  console.log('🧹 Existing data cleared')
+
   // -- Tenant --
   const tenant = await prisma.tenant.create({
     data: {
