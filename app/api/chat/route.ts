@@ -28,6 +28,18 @@ When the user names products for an order (even loosely or with typos):
 5. Then immediately call createOrder, passing the SKU (NOT the name) and quantity.
 If the customer name (customerName) wasn't provided, ask for it once, then create the order.`;
 
+/** Pull a Stripe checkout URL out of a tool result, whatever its shape. */
+function extractCheckoutUrl(result: unknown): string | null {
+  if (!result || typeof result !== "object") return null;
+  const data = (result as { data?: unknown }).data;
+  if (data && typeof data === "object") {
+    const url = (data as { url?: unknown; checkoutUrl?: unknown }).url ??
+      (data as { checkoutUrl?: unknown }).checkoutUrl;
+    if (typeof url === "string" && url) return url;
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
 
   const encoder = new TextEncoder();
@@ -97,6 +109,13 @@ export async function POST(req: Request) {
             } catch (e) {
               // Return the tool error to the model instead of killing the stream
               toolResult = { error: e instanceof Error ? e.message : "tool failed" };
+            }
+
+            // Surface any Stripe payment link directly to the chat so it always
+            // reaches the user, even if the model's text answer omits the URL.
+            const checkoutUrl = extractCheckoutUrl(toolResult);
+            if (checkoutUrl) {
+              send("payment_link", { url: checkoutUrl });
             }
 
             functionResponses.push({
