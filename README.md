@@ -9,12 +9,12 @@ function calling — never hallucinating numbers.
 
 ## Live Demo
 
-🚀 **[Open the live demo](https://depot-ai-manager.vercel.app/)**
+ **[Live demo](https://depot-ai-manager.vercel.app/)**
 
-In the demo, sign-in is disabled and the manual “create” buttons are intentionally turned off —
+In the demo, sign-in is disabled and the manual "create" buttons are intentionally turned off —
 everything is created through the AI assistant. Try:
 
-> *“Create an order of 20 Hex Bolt M8 for Meridian Construction.”*
+> *"Create an order of 20 Hex Bolt M8 for Meridian Construction."*
 
 …and watch the agent find the SKU, verify there is enough stock, and place the order.
 
@@ -36,7 +36,10 @@ everything is created through the AI assistant. Try:
 - 📋 **Orders** — outbound orders with a status workflow
 - 🔁 **Stock Movements** — full audit log of every inventory change (IN/OUT) with user & reason
 - 📈 **Analytics** — revenue, inventory valuation, top products, monthly trend, low-stock list
-- 👥 **Users & Company** — role-based access (Owner, Manager, Staff) STRIPE
+- 👥 **Users & Company** — role-based access (Owner, Manager, Staff)
+- 💳 **Payments** — Stripe Checkout for order payments, Stripe Billing for tenant subscriptions
+- 🔐 **Webhook-driven idempotent payments** — `checkout.session.completed` triggers stock ledger
+  debits atomically; `customer.subscription.updated` manages tenant plan upgrades
 
 ## Tech Stack
 
@@ -46,7 +49,21 @@ everything is created through the AI assistant. Try:
 | Backend | Next.js Server Actions, Prisma 7 ORM |
 | Database | PostgreSQL |
 | AI | Google Gemini (`@google/genai`) — function calling + SSE streaming |
+| Payments | Stripe Checkout, Stripe Billing, Stripe webhooks |
 | Deployment | Vercel |
+
+## Payments (Stripe)
+
+DepotAI uses **Stripe** in test mode for two payment flows:
+
+| Flow | Description |
+| --- | --- |
+| **Order payment** | An order created in `AWAITING_PAYMENT` status. Visiting `/api/orders/<ID>/checkout` redirects to Stripe Checkout. On success, a `checkout.session.completed` webhook finalises the order: status → `PROCESSING`, `paidAt` is set, and `OUT` movements are posted to the stock ledger. |
+| **Tenant subscription** | The `/company` page offers an **Upgrade Plan** button that opens Stripe Checkout for a recurring subscription. The `customer.subscription.created/updated` webhook sets `Tenant.plan = PRO` and stores Stripe subscription metadata. |
+
+Both flows are **idempotent** — every Stripe event is deduplicated via the `ProcessedStripeEvent` table.
+
+For local testing, test card numbers, and Stripe CLI setup, see **[STRIPE_TESTING.md](./STRIPE_TESTING.md)**.
 
 ## Screenshots
 
