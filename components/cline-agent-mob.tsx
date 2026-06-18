@@ -4,6 +4,7 @@ import { FaAngleDoubleRight } from "react-icons/fa"
 import { useEffect, useRef, useState } from "react"
 import { FaMicrophone } from "react-icons/fa"
 import { useSpeech } from "@/hooks/use-speech"
+import { MessageText } from "@/components/ai-agent/message-text"
 
 type Message = { role: 'user' | 'ai'; text: string }
 
@@ -64,7 +65,19 @@ export default function MobAI({ isOpen }: MobAIProps) {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ""
-      let isFirstChunk = true
+
+      let answer = ""
+      let toolStatus = ""
+      let paymentLink = ""
+      const compose = () => {
+        const lines: string[] = []
+        if (answer) lines.push(answer)
+        else if (toolStatus) lines.push(toolStatus)
+        if (paymentLink && !answer.includes(paymentLink)) {
+          lines.push(`💳 Payment link: ${paymentLink}`)
+        }
+        return lines.join("\n\n")
+      }
 
       while (true) {
         const { done, value } = await reader.read()
@@ -87,15 +100,15 @@ export default function MobAI({ isOpen }: MobAIProps) {
             continue
           }
 
-          if (isFirstChunk && (data.type === 'text' || data.type === 'tool_call')) {
-            updateLastMessage(() => "")
-            isFirstChunk = false
-          }
-
           if (data.type === 'text') {
-            updateLastMessage((t) => t + data.content)
+            answer += data.content
+            updateLastMessage(compose)
           } else if (data.type === 'tool_call') {
-            updateLastMessage(() => `⚙️ I'm gonna use ${data.content.tool}...`)
+            toolStatus = `⚙️ I'm gonna use ${data.content.tool}...`
+            updateLastMessage(compose)
+          } else if (data.type === 'payment_link') {
+            paymentLink = data.content.url
+            updateLastMessage(compose)
           } else if (data.type === 'error') {
             updateLastMessage(() => `${data.content}`)
           }
@@ -133,7 +146,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
                 : 'bg-card border text-card-foregroundself-start rounded-xl rounded-bl-sm'
             }`}
           >
-            {m.text}
+            <MessageText text={m.text} />
           </div>
         ))}
       </div>

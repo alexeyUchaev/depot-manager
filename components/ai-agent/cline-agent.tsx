@@ -2,6 +2,7 @@
 import { CgToggleSquare, CgToggleSquareOff } from "react-icons/cg";
 import { useEffect, useRef, useState } from "react";
 import AiTextArea from "./ai-text-area";
+import { MessageText } from "./message-text";
 
 type Message = { role: 'user' | 'ai'; text: string };
 
@@ -57,7 +58,21 @@ export function ClineAgent() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let isFirstChunk = true;
+
+      // Compose the assistant message from independent pieces so a tool status
+      // never clobbers the final answer and the payment link always shows.
+      let answer = "";
+      let toolStatus = "";
+      let paymentLink = "";
+      const compose = () => {
+        const lines: string[] = [];
+        if (answer) lines.push(answer);
+        else if (toolStatus) lines.push(toolStatus);
+        if (paymentLink && !answer.includes(paymentLink)) {
+          lines.push(`💳 Payment link: ${paymentLink}`);
+        }
+        return lines.join("\n\n");
+      };
 
       while (true) {
         const { done, value } = await reader.read();
@@ -80,15 +95,15 @@ export function ClineAgent() {
             continue;
           }
 
-          if (isFirstChunk && (data.type === 'text' || data.type === 'tool_call')) {
-            updateLastMessage(() => "");
-            isFirstChunk = false;
-          }
-
           if (data.type === 'text') {
-            updateLastMessage((t) => t + data.content);
+            answer += data.content;
+            updateLastMessage(compose);
           } else if (data.type === 'tool_call') {
-          updateLastMessage(() => `⚙️ Using ${data.content.tool || 'a tool'}... `);
+            toolStatus = `⚙️ Using ${data.content.tool || 'a tool'}...`;
+            updateLastMessage(compose);
+          } else if (data.type === 'payment_link') {
+            paymentLink = data.content.url;
+            updateLastMessage(compose);
           } else if (data.type === 'error') {
             updateLastMessage(() => `${data.content}`);
           }
@@ -132,7 +147,7 @@ export function ClineAgent() {
                         : '	bg-card border text-card-foreground self-start rounded-xl rounded-bl-sm'
                     }`}
                   >
-                    {m.text}
+                    <MessageText text={m.text} />
                   </div>
                 ))}
               </div>
