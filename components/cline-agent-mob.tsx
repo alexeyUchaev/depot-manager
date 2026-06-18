@@ -1,10 +1,11 @@
 "use client"
 
-import { FaAngleDoubleRight } from "react-icons/fa"
+import { FaAngleDoubleRight, FaPaperclip, FaTimes } from "react-icons/fa"
 import { useEffect, useRef, useState } from "react"
 import { FaMicrophone } from "react-icons/fa"
 import { useSpeech } from "@/hooks/use-speech"
 import { MessageText } from "@/components/ai-agent/message-text"
+import { type ChatAttachment } from "@/components/ai-agent/ai-text-area"
 
 type Message = { role: 'user' | 'ai'; text: string }
 
@@ -18,7 +19,47 @@ export default function MobAI({ isOpen }: MobAIProps) {
   const { listening, supported, toggle } = useSpeech((text) =>
   setInputText((prev) => (prev ? prev + " " : "") + text))
   const [isLoading, setIsLoading] = useState(false)
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const handleAttach = async (files: FileList) => {
+    const picked = Array.from(files)
+    const startIndex = attachments.length
+    setAttachments((prev) => [
+      ...prev,
+      ...picked.map((f) => ({ filename: f.name, mimeType: f.type, uploading: true })),
+    ])
+
+    await Promise.all(
+      picked.map(async (file, i) => {
+        const index = startIndex + i
+        try {
+          const form = new FormData()
+          form.append("file", file)
+          const res = await fetch("/api/chat/attachments", { method: "POST", body: form })
+          const json = await res.json()
+          setAttachments((prev) => {
+            const next = [...prev]
+            if (!next[index]) return prev
+            next[index] = res.ok
+              ? { ...next[index], id: json.id, uploading: false }
+              : { ...next[index], uploading: false, error: json.error || "Upload failed" }
+            return next
+          })
+        } catch {
+          setAttachments((prev) => {
+            const next = [...prev]
+            if (next[index]) next[index] = { ...next[index], uploading: false, error: "Upload failed" }
+            return next
+          })
+        }
+      })
+    )
+  }
+
+  const removeAttachment = (index: number) =>
+    setAttachments((prev) => prev.filter((_, i) => i !== index))
 
   useEffect(() => {
     const el = scrollRef.current
@@ -37,23 +78,32 @@ export default function MobAI({ isOpen }: MobAIProps) {
 
   const handleSendMessage = async () => {
     const text = inputText.trim()
-    if (!text || isLoading) return
+    const ready = attachments.filter((a) => a.id && !a.error)
+    if ((!text && ready.length === 0) || isLoading) return
+    if (attachments.some((a) => a.uploading)) return
 
-    const userMsg: Message = { role: 'user', text }
-    const payloadMessages = [...messages, userMsg].map((m) => ({
+    const attachmentNote = ready.length ? `📎 ${ready.map((a) => a.filename).join(', ')}` : ''
+    const displayText = [text, attachmentNote].filter(Boolean).join('\n')
+
+    const userMsg: Message = { role: 'user', text: displayText }
+    const payloadMessages = [...messages, { role: 'user' as const, text }].map((m) => ({
       role: m.role === 'user' ? 'user' : 'model',
       parts: [{ text: m.text }],
     }))
 
     setMessages((prev) => [...prev, userMsg, { role: 'ai', text: "Thinking..." }])
     setInputText("")
+    setAttachments([])
     setIsLoading(true)
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: payloadMessages }),
+        body: JSON.stringify({
+          messages: payloadMessages,
+          attachments: ready.map((a) => ({ id: a.id })),
+        }),
       })
 
       if (!response.ok || !response.body) {
@@ -151,9 +201,45 @@ export default function MobAI({ isOpen }: MobAIProps) {
         ))}
       </div>
       <div className="p-3 border-t border-sidebar-border">
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {attachments.map((a, i) => (
+              <span
+                key={i}
+                className={`inline-flex items-center gap-1 max-w-full rounded-md border px-2 py-1 text-xs ${
+                  a.error ? 'border-red-400 text-red-600' : 'border-gray-200 bg-card text-foreground'
+                }`}
+                title={a.error || a.filename}
+              >
+                <FaPaperclip className="h-2.5 w-2.5 shrink-0 opacity-60" />
+                <span className="truncate">{a.filename}</span>
+                {a.uploading && <span className="opacity-60">…</span>}
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(i)}
+                  aria-label="Remove attachment"
+                  className="shrink-0 opacity-60 hover:opacity-100"
+                >
+                  <FaTimes className="h-2.5 w-2.5" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files?.length) handleAttach(e.target.files)
+            e.target.value = ""
+          }}
+        />
         <div className="relative bg-card border rounded-xl shadow-sm w-full h-[100px] focus-within:ring-2 focus-within:ring-ring focus-within:border-transparent transition">
           <textarea
-            className="h-full w-full align-top resize-none outline-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground px-3 py-2 pr-10 disabled:opacity-60"
+            className="h-full w-full align-top resize-none outline-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground pl-10 pr-10 py-2 disabled:opacity-60"
             placeholder="Type a message..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -165,6 +251,15 @@ export default function MobAI({ isOpen }: MobAIProps) {
               }
             }}
           />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            aria-label="Attach document"
+            className="absolute left-2 bottom-2 p-2 rounded-lg text-muted-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+          >
+            <FaPaperclip className="h-3 w-3" />
+          </button>
           {supported && (
             <button
               type="button"

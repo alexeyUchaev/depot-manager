@@ -2,6 +2,8 @@ import { GoogleGenAI } from "@google/genai";
 import { revalidatePath } from "next/cache";
 import { depotTools } from "@/lib/ai-tools";
 import { executeTool } from "@/lib/ai-executor";
+import { prisma } from "@/lib/prisma";
+import { DEMO_TENANT_ID } from "@/lib/constants";
 
 export const runtime = "nodejs"; // node runtime is required for executeTool/revalidatePath
 
@@ -58,7 +60,7 @@ export async function POST(req: Request) {
           return;
         }
 
-        const { messages } = await req.json();
+        const { messages, attachments } = await req.json();
         console.log("📨 messages:", messages?.length);
 
         if (!Array.isArray(messages) || messages.length === 0) {
@@ -68,9 +70,33 @@ export async function POST(req: Request) {
 
         const history = [...messages];
         const lastMessageObj = history.pop();
-        const userMessage = lastMessageObj?.parts?.[0]?.text ?? "";
+        const userText = lastMessageObj?.parts?.[0]?.text ?? "";
 
-        if (!userMessage.trim()) {
+        // Load any attachments (images / PDFs) for this message from the DB and
+        // forward them to Gemini as inline multimodal parts.
+        const attachmentIds: string[] = Array.isArray(attachments)
+          ? attachments
+              .map((a: { id?: string }) => a?.id)
+              .filter((id: unknown): id is string => typeof id === "string")
+          : [];
+
+        const attachmentParts: { inlineData: { mimeType: string; data: string } }[] = [];
+        if (attachmentIds.length > 0) {
+          const rows = await prisma.chatAttachment.findMany({
+            where: { id: { in: attachmentIds }, orgId: DEMO_TENANT_ID },
+            select: { mimeType: true, data: true },
+          });
+          for (const row of rows) {
+            attachmentParts.push({
+              inlineData: {
+                mimeType: row.mimeType,
+                data: Buffer.from(row.data).toString("base64"),
+              },
+            });
+          }
+        }
+
+        if (!userText.trim() && attachmentParts.length === 0) {
           send("error", "User message is empty");
           return;
         }
@@ -84,7 +110,12 @@ export async function POST(req: Request) {
           },
         });
 
-        let response = await chat.sendMessage({ message: userMessage });
+        // Gemini accepts a Part[] message: the user's text plus any files.
+        const messageParts: unknown[] = [];
+        if (userText.trim()) messageParts.push({ text: userText });
+        messageParts.push(...attachmentParts);
+
+        let response = await chat.sendMessage({ message: messageParts as never });
 
         const MAX_STEPS = 5;
         for (let step = 0; step < MAX_STEPS; step++) {
