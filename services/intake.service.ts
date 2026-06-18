@@ -149,7 +149,7 @@ export const intakeService = {
         },
       }
     } catch (e: unknown) {
-      const error = e instanceof Error ? e.message : 'Failed to create order'
+      const error = e instanceof Error ? e.message : 'Failed to create intake'
       return { success: false, error }
     }
   },

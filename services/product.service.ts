@@ -157,8 +157,8 @@ export const  createProduct = async(
     }
   }
 
-  // Обновить товар
- 
+  // Update a product
+
 export const  updateProduct = async (
     id: string,
     tenantId: string,
