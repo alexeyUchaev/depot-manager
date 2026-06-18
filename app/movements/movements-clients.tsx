@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowDownCircle,
   ArrowUpCircle,
   Search,
-  Plus,
   FileText,
   User,
   X,
 } from "lucide-react";
 import type { MovementDTO } from '@/services/movements.service'
+
+const subscribe = () => () => {};
 
 function TypeBadge({ type }: { type: MovementDTO['type'] }) {
   if (type === 'IN') {
@@ -31,10 +32,9 @@ function TypeBadge({ type }: { type: MovementDTO['type'] }) {
 }
 
 function MovementDetailModal({ movement, onClose }: { movement: MovementDTO; onClose: () => void }) {
-  const [mounted, setMounted] = useState(false);
+ const mounted = useSyncExternalStore(subscribe, () => true, () => false);
 
   useEffect(() => {
-    setMounted(true);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };

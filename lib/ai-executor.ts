@@ -3,7 +3,20 @@ import { DEMO_TENANT_ID, DEMO_USER_ID } from "./constants";
 import { analyticsService } from "@/services/analytics.service";
 import { intakeService } from "@/services/intake.service";
 import { paymentService } from "@/services/payment.service";
-export async function executeTool(name: string, args: any) {
+
+export interface ToolArgs {
+  name: string
+  sku: string
+  category?: string
+  location?: string
+  price: number
+  lowStockAt?: number
+  products?: { sku: string; quantity: number | string }[]
+  customerName: string
+  orderId: string
+}
+
+export async function executeTool(name: string, args: ToolArgs) {
   const tenantId = DEMO_TENANT_ID;
   const userId = DEMO_USER_ID;
 

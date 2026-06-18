@@ -3,9 +3,30 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 
 const subscribe = () => () => {}
 
-function getSpeechCtor() {
+interface SpeechRecognitionEventLike {
+  results: { [i: number]: { [j: number]: { transcript: string } } }
+}
+interface SpeechRecognitionLike {
+  lang: string
+  interimResults: boolean
+  continuous: boolean
+  onresult: ((e: SpeechRecognitionEventLike) => void) | null
+  onend: (() => void) | null
+  onerror: (() => void) | null
+  start(): void
+  stop(): void
+  abort(): void
+}
+
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike
+
+function getSpeechCtor(): SpeechRecognitionCtor | null {
   if (typeof window === "undefined") return null
-  return (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition || null
+  const w = window as unknown as {
+    SpeechRecognition?: SpeechRecognitionCtor
+    webkitSpeechRecognition?: SpeechRecognitionCtor
+  }
+  return w.SpeechRecognition || w.webkitSpeechRecognition || null
 }
 
 export function useSpeech(onResult: (text: string) => void) {
@@ -16,7 +37,7 @@ export function useSpeech(onResult: (text: string) => void) {
   )
 
   const [listening, setListening] = useState(false)
-  const recRef = useRef<any>(null)
+  const recRef = useRef<SpeechRecognitionLike | null>(null)
 
   // keep the latest callback without recreating the recognizer
   const onResultRef = useRef(onResult)
@@ -31,7 +52,7 @@ export function useSpeech(onResult: (text: string) => void) {
     rec.lang = "en-US"
     rec.interimResults = false
     rec.continuous = false
-    rec.onresult = (e: any) => onResultRef.current(e.results[0][0].transcript)
+    rec.onresult = (e: SpeechRecognitionEventLike) => onResultRef.current(e.results[0][0].transcript)
     rec.onend = () => setListening(false)
     rec.onerror = () => setListening(false)
     recRef.current = rec

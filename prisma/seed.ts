@@ -191,8 +191,7 @@ async function main() {
   })
   console.log('✅ Tenant created')
 
-  // -- Users --
-  const owner = await prisma.user.create({
+ await prisma.user.create({
     data: {
       id: DEMO_USER_ID,
       clerkId: 'demo_user_owner',
