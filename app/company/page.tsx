@@ -11,8 +11,22 @@ import {
   Globe,
   ShieldCheck
 } from "lucide-react";
+import { startSubscriptionCheckout } from "@/actions/billing.actions";
 
 export default function CompanyPage() {
+  const [upgrading, setUpgrading] = React.useState(false);
+
+  async function handleUpgrade() {
+    setUpgrading(true);
+    const result = await startSubscriptionCheckout();
+    if (result.success) {
+      window.location.href = result.data.url;
+    } else {
+      alert(result.error ?? "Failed to start checkout");
+      setUpgrading(false);
+    }
+  }
+
   const companyData = {
     name: "TechMart Wholesale Inc.",
     status: "Active",
@@ -195,10 +209,11 @@ export default function CompanyPage() {
                 <span className="font-medium text-foreground">{companyData.plan.nextPayment}</span>
               </div>
               <button
-                onClick={() => alert("Demo Mode: Upgrade restricted.")}
-                className="w-full py-2  border border-primary text-primary hover:bg-muted rounded-lg text-sm font-medium transition-colors"
+                onClick={handleUpgrade}
+                disabled={upgrading}
+                className="w-full py-2  border border-primary text-primary hover:bg-muted rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
               >
-                Upgrade Plan
+                {upgrading ? "Redirecting…" : "Upgrade Plan"}
               </button>
             </div>
           </div>
