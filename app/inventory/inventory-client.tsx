@@ -89,7 +89,7 @@ export default function InventoryClient({ products }: { products: ProductDTO[] }
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 text-sm">
+            <tbody className="divide-y divide-border text-sm">
               {products.map((product) => (
                 <tr key={product.id}
                   className="hover:bg-muted/50 transition-colors cursor-pointer">

@@ -54,7 +54,6 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
           <PackagePlus className="h-4 w-4" /> Create Intake
         </button>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-card border rounded-xl p-4 shadow-sm">
         <div className="relative md:col-span-2">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground"><Search className="h-4 w-4" /></span>
@@ -65,7 +64,6 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
           Total Orders: <span className="text-sm font-bold text-foreground bg-muted px-2 py-0.5 rounded ml-1">{intakes.length}</span>
         </div>
       </div>
-
       {/* Mobile cards */}
       <div className="md:hidden space-y-2">
         {intakes.map((intake) => (
@@ -81,7 +79,6 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
           </button>
         ))}
       </div>
-
       {/* Desktop table */}
       <div className="hidden md:block bg-card border rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
