@@ -9,7 +9,7 @@ function calling — never hallucinating numbers.
 
 ## Live Demo
 
- **[Live demo](https://depot-ai-manager.vercel.app/)**
+ -> **[Live demo](https://depot-ai-manager.vercel.app/)** <-
 
 In the demo, sign-in is disabled and the manual "create" buttons are intentionally turned off —
 everything is created through the AI assistant. Try:
