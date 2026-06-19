@@ -14,7 +14,7 @@ model Tenant {
   plan                 Plan      @default(FREE)
   stripeCustomerId     String?
   stripeSubscriptionId String?   @unique
-  subscriptionStatus   String? // active / past_due / canceled / incomplete ...
+  subscriptionStatus   String?
   currentPeriodEnd     DateTime?
   createdAt            DateTime  @default(now())
 
@@ -93,13 +93,10 @@ model Order {
   status       OrderStatus @default(AWAITING_PAYMENT)
   createdAt    DateTime    @default(now())
 
-  // Stripe payment tracking. Stock (OUT movements) is only dispatched once the
-  // order is actually paid (handled in the Stripe webhook), so an unpaid order
-  // never silently consumes inventory.
   stripeCheckoutSessionId String?   @unique
   stripePaymentIntentId   String?   @unique
   paidAt                  DateTime?
-  amountTotal             Int? // amount charged, in the smallest currency unit (cents)
+  amountTotal             Int? 
   currency                String?   @default("usd")
 
   org       Tenant @relation(fields: [orgId], references: [id])
@@ -182,17 +179,13 @@ enum IntakeStatus {
   REJECTED
 }
 
-// Stripe delivers webhook events at-least-once, so the handler must be
-// idempotent. We record every processed event id here and skip duplicates.
+
 model ProcessedStripeEvent {
-  id          String   @id // Stripe event.id
+  id          String   @id 
   type        String
   processedAt DateTime @default(now())
 }
 
-// Files attached to the AI chat (images, PDFs). The binary is stored inline so
-// attachments survive across sessions; the chat route also forwards the bytes
-// to Gemini as multimodal input.
 model ChatAttachment {
   id        String   @id @default(cuid())
   orgId     String
