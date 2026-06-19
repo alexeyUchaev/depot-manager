@@ -4,17 +4,8 @@ import { stripe, assertStripeConfigured, appBaseUrl } from '@/lib/stripe'
 import { orderService } from './order.service'
 import type { ActionResult } from '@/types/user.types'
 
-/**
- * Payment orchestration: builds Stripe Checkout sessions for warehouse orders
- * and for SaaS subscriptions, and processes incoming webhook events. All stock
- * and plan side effects happen here (driven by webhooks), never optimistically
- * on the client.
- */
 export const paymentService = {
-  /**
-   * Create a one-off Checkout Session to pay for an existing order.
-   * Returns the hosted Stripe URL to redirect the customer to.
-   */
+  
   async createOrderCheckoutSession(
     tenantId: string,
     orderId: string
@@ -66,10 +57,7 @@ export const paymentService = {
     }
   },
 
-  /**
-   * Create a subscription Checkout Session to upgrade a tenant to the PRO plan.
-   * Reuses (or lazily creates) the tenant's Stripe customer.
-   */
+  
   async createSubscriptionCheckoutSession(
     tenantId: string
   ): Promise<ActionResult<{ url: string }>> {
@@ -105,7 +93,6 @@ export const paymentService = {
     }
   },
 
-  /** Open the Stripe billing portal so the tenant can manage their subscription. */
   async createBillingPortalSession(
     tenantId: string
   ): Promise<ActionResult<{ url: string }>> {
@@ -126,10 +113,6 @@ export const paymentService = {
     }
   },
 
-  /**
-   * Process a verified Stripe event. Idempotent at the event level via
-   * ProcessedStripeEvent, so at-least-once delivery never double-applies.
-   */
   async handleEvent(event: Stripe.Event): Promise<void> {
     const already = await prisma.processedStripeEvent.findUnique({
       where: { id: event.id },
@@ -140,7 +123,7 @@ export const paymentService = {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
         if (session.metadata?.kind === 'order' && session.metadata.orderId) {
-          await orderService.finalizePaidOrder({
+          const res = await orderService.finalizePaidOrder({
             orderId: session.metadata.orderId,
             stripeCheckoutSessionId: session.id,
             stripePaymentIntentId:
@@ -150,6 +133,12 @@ export const paymentService = {
             amountTotal: session.amount_total,
             currency: session.currency,
           })
+          // Не глотаем ошибку: иначе событие пометится обработанным,
+          // вебхук вернёт 200, Stripe не повторит, а заказ навсегда
+          // останется в AWAITING_PAYMENT.
+          if (!res.success) {
+            throw new Error(`finalizePaidOrder failed: ${res.error}`)
+          }
         }
         break
       }
@@ -157,7 +146,12 @@ export const paymentService = {
       case 'checkout.session.expired': {
         const session = event.data.object as Stripe.Checkout.Session
         if (session.metadata?.kind === 'order' && session.metadata.orderId) {
-          await orderService.cancelUnpaidOrder(session.metadata.orderId)
+          const res = await orderService.cancelUnpaidOrder(
+            session.metadata.orderId
+          )
+          if (!res.success) {
+            throw new Error(`cancelUnpaidOrder failed: ${res.error}`)
+          }
         }
         break
       }
@@ -180,7 +174,6 @@ export const paymentService = {
   },
 }
 
-/** Find or create the Stripe customer for a tenant and persist its id. */
 async function ensureStripeCustomer(tenantId: string): Promise<string> {
   const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } })
   if (!tenant) throw new Error('Tenant not found')
@@ -197,7 +190,6 @@ async function ensureStripeCustomer(tenantId: string): Promise<string> {
   return customer.id
 }
 
-/** Sync a tenant's plan/subscription columns from a Stripe subscription. */
 async function applySubscriptionState(sub: Stripe.Subscription): Promise<void> {
   const customerId =
     typeof sub.customer === 'string' ? sub.customer : sub.customer.id
