@@ -67,8 +67,8 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
             Welcome back! Here is an operational overview of your warehouse today.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground  bg-muted border px-3 py-1.5 rounded-lg">
-          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+        <div className="flex items-center gap-2 text-xs font-medium text-foreground/80  bg-muted border px-3 py-1.5 rounded-lg">
+          <Clock className="h-3.5 w-3.5 text-foreground/80" />
           System Updated: Just Now
         </div>
       </div>
@@ -82,7 +82,11 @@ export default function DashboardClient({ stats }: { stats: DashboardStats | nul
                   {kpi.title}
                 </span>
                 <span className="text-xl md:text-lg font-bold block">{kpi.value}</span>
-                <span className="text-xs font-medium text-green-600 dark:text-green-400 flex items-center gap-0.5">
+                <span className={`text-xs font-medium flex items-center gap-0.5 ${
+                  kpi.change.startsWith('+')
+                    ? 'text-green-700 dark:text-green-400'
+                    : 'text-foreground/80'
+                 }`}>
                   {kpi.change.startsWith('+') && <ArrowUpRight className="h-3 w-3" />}
                   {kpi.change}
                 </span>

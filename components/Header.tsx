@@ -11,6 +11,8 @@ export default function Header() {
     return(
         <header className="fixed z-40 flex justify-between items-center md:hidden px-2 py-2 border-b border-[#c3cfd3] top-0 bg-background w-full p-2">            
             <button
+                type="button"
+                aria-label="Toggle navigation menu"
                 onClick={toggleSidebar}
                 className="flex flex-col justify-around  px-1 h-6 rounded-xs py-[3px]"
             >
