@@ -93,25 +93,10 @@ export async function executeTool(name: string, args: ToolArgs) {
         });
       }
 
-      const created = await services.orderService.create(tenantId, userId, {
+      const created = await services.intakeService.create(tenantId, userId, {
         customerName: args.customerName,
         items,
       });
-
-      if (created.success && created.data) {
-        const checkout = await paymentService.createOrderCheckoutSession(
-          tenantId,
-          created.data.id
-        );
-        return {
-          ...created,
-          data: {
-            ...created.data,
-            checkoutUrl: checkout.success ? checkout.data.url : null,
-            checkoutError: checkout.success ? undefined : checkout.error,
-          },
-        };
-      }
 
       return created;
     }
