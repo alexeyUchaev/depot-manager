@@ -2,6 +2,7 @@
 
 import { FaAngleDoubleRight, FaPaperclip, FaTimes } from "react-icons/fa"
 import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { FaMicrophone } from "react-icons/fa"
 import { useSpeech } from "@/hooks/use-speech"
 import { MessageText } from "@/components/ai-agent/message-text"
@@ -22,6 +23,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
   const [attachments, setAttachments] = useState<ChatAttachment[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   const handleAttach = async (files: FileList) => {
     const picked = Array.from(files)
@@ -119,6 +121,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
       let answer = ""
       let toolStatus = ""
       let paymentLink = ""
+      let usedTool = false
       const compose = () => {
         const lines: string[] = []
         if (answer) lines.push(answer)
@@ -154,6 +157,7 @@ export default function MobAI({ isOpen }: MobAIProps) {
             answer += data.content
             updateLastMessage(compose)
           } else if (data.type === 'tool_call') {
+            usedTool = true
             toolStatus = `⚙️ I'm gonna use ${data.content.tool}...`
             updateLastMessage(compose)
           } else if (data.type === 'payment_link') {
@@ -163,6 +167,13 @@ export default function MobAI({ isOpen }: MobAIProps) {
             updateLastMessage(() => `${data.content}`)
           }
         }
+      }
+
+      // revalidatePath на сервере сбрасывает только серверный кеш.
+      // router.refresh() обновляет клиентский Router Cache, чтобы новый
+      // заказ появился без ручной перезагрузки страницы.
+      if (usedTool) {
+        router.refresh()
       }
     } catch (e) {
       console.error("Error:", e)

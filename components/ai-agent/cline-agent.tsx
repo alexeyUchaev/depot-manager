@@ -1,6 +1,7 @@
 'use client';
 import { CgToggleSquare, CgToggleSquareOff } from "react-icons/cg";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import AiTextArea, { type ChatAttachment } from "./ai-text-area";
 import { MessageText } from "./message-text";
 
@@ -13,6 +14,7 @@ export function ClineAgent() {
   const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const handleAttach = async (files: FileList) => {
     const picked = Array.from(files);
@@ -116,6 +118,7 @@ export function ClineAgent() {
       let answer = "";
       let toolStatus = "";
       let paymentLink = "";
+      let usedTool = false;
       const compose = () => {
         const lines: string[] = [];
         if (answer) lines.push(answer);
@@ -151,6 +154,7 @@ export function ClineAgent() {
             answer += data.content;
             updateLastMessage(compose);
           } else if (data.type === 'tool_call') {
+            usedTool = true;
             toolStatus = `⚙️ Using ${data.content.tool || 'a tool'}...`;
             updateLastMessage(compose);
           } else if (data.type === 'payment_link') {
@@ -160,6 +164,13 @@ export function ClineAgent() {
             updateLastMessage(() => `${data.content}`);
           }
         }
+      }
+
+      // revalidatePath на сервере сбрасывает только серверный кеш.
+      // router.refresh() обновляет клиентский Router Cache, чтобы новый
+      // заказ появился без ручной перезагрузки страницы.
+      if (usedTool) {
+        router.refresh();
       }
     } catch (e) {
       console.error("Error:", e);
