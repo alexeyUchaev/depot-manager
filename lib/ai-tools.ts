@@ -69,6 +69,32 @@ export const depotTools: FunctionDeclaration[] = [
     },
   },
   {
+    name: "createIntake",
+    description:
+      "Create an intake. IMPORTANT: first call getAllProductsByTenant, match the " +
+      "products by name, take their exact SKUs and check there is enough stock. " +
+      "Pass the SKU (NOT the name) to createOrder. Never invent a SKU. ",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        customerName: { type: Type.STRING, description: "Customer name" },
+        products: {
+          type: Type.ARRAY,
+          description: "Intake line items",
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              sku: { type: Type.STRING, description: "Product SKU from getAllProductsByTenant" },
+              quantity:  { type: Type.NUMBER, description: "Quantity" },
+            },
+            required: ["sku", "quantity"],
+          },
+        },
+      },
+      required: ["customerName", "products"],
+    },
+  },
+  {
     name: "createOrderCheckout",
     description:
       "Create a Stripe Checkout payment link for an existing unpaid order. " +

@@ -77,6 +77,45 @@ export async function executeTool(name: string, args: ToolArgs) {
 
       return created;
     }
+
+    case "createIntake": {
+      const items = [];
+      for (const p of args.products ?? []) {
+        const product = await services.getBySku(p.sku, tenantId);
+        if (!product) {
+          return { error: `Product not found: ${p.sku}` };
+        }
+        items.push({
+          id: product.id,
+          sku: product.sku,
+          quantity: Number(p.quantity),
+          price: product.price,
+        });
+      }
+
+      const created = await services.orderService.create(tenantId, userId, {
+        customerName: args.customerName,
+        items,
+      });
+
+      if (created.success && created.data) {
+        const checkout = await paymentService.createOrderCheckoutSession(
+          tenantId,
+          created.data.id
+        );
+        return {
+          ...created,
+          data: {
+            ...created.data,
+            checkoutUrl: checkout.success ? checkout.data.url : null,
+            checkoutError: checkout.success ? undefined : checkout.error,
+          },
+        };
+      }
+
+      return created;
+    }
+    
     case "createOrderCheckout":
       return await paymentService.createOrderCheckoutSession(tenantId, args.orderId);
 
