@@ -31,7 +31,7 @@ export default function Footer() {
                         <button onClick={() => setIsopen(prev => !prev)} aria-label="Toggle AI assistant" aria-expanded={isopen} className="absolute bottom-2 right-3  bg-background rounded-sm text-white  w-10 h-10 p-2 ">
                             <Image 
                                 src={robot}
-                                alt="robot" 
+                                alt="" 
                                 fill={true} 
                                 className="dark:invert"    
                             />
