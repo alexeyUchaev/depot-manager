@@ -23,12 +23,12 @@ export default function Footer() {
                 <div className="flex justify-between text-left max-width-[55%] items-center  ">
                     {items.map((item) => (
                         <div key={item.title}>
-                            <Link href={item.url} className="text-foreground"><item.icon/></Link>          
+                            <Link href={item.url} aria-label={item.title} className="text-foreground"><item.icon  aria-hidden="true"/></Link>          
                         </div>
                     ))}   
                     <div>   
                         <div className=" bottom-2 right-2  bg-background rounded-sm text-white  w-10 h-1 p-2"></div>
-                        <button onClick={() => setIsopen(prev => !prev)} className="absolute bottom-2 right-3  bg-background rounded-sm text-white  w-10 h-10 p-2 ">
+                        <button onClick={() => setIsopen(prev => !prev)} aria-label="Toggle AI assistant" aria-expanded={isopen} className="absolute bottom-2 right-3  bg-background rounded-sm text-white  w-10 h-10 p-2 ">
                             <Image 
                                 src={robot}
                                 alt="robot" 

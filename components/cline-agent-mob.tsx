@@ -169,9 +169,6 @@ export default function MobAI({ isOpen }: MobAIProps) {
         }
       }
 
-      // revalidatePath на сервере сбрасывает только серверный кеш.
-      // router.refresh() обновляет клиентский Router Cache, чтобы новый
-      // заказ появился без ручной перезагрузки страницы.
       if (usedTool) {
         router.refresh()
       }
