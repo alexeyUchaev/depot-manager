@@ -137,7 +137,7 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
           title={selected.intakeNumber}
           badges={<StatusBadge status={selected.status} />}
           rows={[
-            { label: 'Customer', value: selected.customerName },
+            { label: 'Supplier', value: selected.customerName },
             { label: 'Date', value: new Date(selected.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) },
             { label: 'Assigned To', value: selected.assignedTo },
             { label: 'Total', value: `$${selected.total.toFixed(2)}` },
