@@ -86,7 +86,7 @@ export default function IntakeClient({ intakes }: { intakes: IntakeDTO[] }) {
             <thead>
               <tr className="bg-muted border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <th className="px-6 py-4">Intake ID / Date</th>
-                <th className="px-6 py-4">Supplier</th>
+                <th className="px-6 py-4">Supplier </th>
                 <th className="px-6 py-4 hidden lg:table-cell">Items</th>
                 <th className="px-6 py-4 hidden 2xl:table-cell">Assigned To</th>
                 <th className="px-6 py-4 hidden 2xl:table-cell">Total Amount</th>
