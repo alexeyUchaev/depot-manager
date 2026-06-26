@@ -11,6 +11,10 @@ const globalForPrisma = globalThis as unknown as {
 
 const pool = globalForPrisma.pool ?? new Pool({
   connectionString: process.env.DATABASE_URL,
+  // Supabase's pooler enforces a hard client cap. Keep each instance's pool
+  // small so serverless functions don't exhaust it (use the transaction
+  // pooler, port 6543, for DATABASE_URL). Override via DATABASE_POOL_MAX.
+  max: Number(process.env.DATABASE_POOL_MAX ?? 3),
 })
 
 if (process.env.NODE_ENV !== 'production') {
