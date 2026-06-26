@@ -1,6 +1,8 @@
 import { getDashboardStats } from '@/actions/dashboard.actions'
 import DashboardClient from './dashboard-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const result = await getDashboardStats()
   const stats = result.success ? result.data : null
