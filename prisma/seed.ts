@@ -4,7 +4,13 @@ import pg from 'pg'
 import { DEMO_TENANT_ID, DEMO_USER_ID } from '../lib/constants'
 
 const { Pool } = pg
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+// Seed against the session pooler / direct connection (DIRECT_URL). Cap the
+// pool so the bulk Promise.all inserts below don't open a burst of connections
+// and trip Supabase's session-mode client limit (EMAXCONNSESSION).
+const pool = new Pool({
+  connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
+  max: Number(process.env.DATABASE_POOL_MAX ?? 3),
+})
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
