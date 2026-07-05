@@ -32,84 +32,72 @@ export const analyticsService = {
     
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+    const sixMonthsStart = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-    const currentMonthOrders = await prisma.order.findMany({
-      where: {
-        orgId: tenantId,
-        createdAt: { gte: startOfMonth },
-        status: { in: ['SHIPPED', 'DELIVERED'] },
-      },
-      include: { items: true },
+    // One round of parallel queries per render — this page used to issue ~12
+    // sequential queries (one findMany per month of the revenue chart),
+    // holding a pooler connection for the whole waterfall.
+    const [sellableOrders, products, totalOrders, orderItems, movements, lowStock] =
+      await Promise.all([
+        prisma.order.findMany({
+          where: {
+            orgId: tenantId,
+            createdAt: { gte: sixMonthsStart },
+            status: { in: ['SHIPPED', 'DELIVERED'] },
+          },
+          include: { items: true },
+        }),
+        prisma.product.findMany({
+          where: { orgId: tenantId },
+        }),
+        prisma.order.count({
+          where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
+        }),
+        prisma.orderItem.findMany({
+          where: { order: { orgId: tenantId } },
+          include: { product: { select: { name: true, sku: true } } },
+        }),
+        prisma.stockMovement.findMany({
+          where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
+        }),
+        prisma.product.findMany({
+          where: { orgId: tenantId, cachedQuantity: { lte: prisma.product.fields.lowStockAt } },
+          select: { name: true, sku: true, cachedQuantity: true },
+        }),
+      ])
+
+    const orderRevenue = (order: (typeof sellableOrders)[number]) =>
+      order.items.reduce((s, item) => s + Number(item.price) * item.quantity, 0)
+
+    // Bucket the six-month order history by calendar month in memory.
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const monthKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}`
+    const revenueByMonth: Record<string, number> = {}
+    sellableOrders.forEach((order) => {
+      const key = monthKey(new Date(order.createdAt))
+      revenueByMonth[key] = (revenueByMonth[key] ?? 0) + orderRevenue(order)
     })
 
-    const grossRevenue = currentMonthOrders.reduce(
-      (sum, order) =>
-        sum + order.items.reduce((s, item) => s + Number(item.price) * item.quantity, 0),
-      0
-    )
-
-    const lastMonthOrders = await prisma.order.findMany({
-      where: {
-        orgId: tenantId,
-        createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
-        status: { in: ['SHIPPED', 'DELIVERED'] },
-      },
-      include: { items: true },
+    const monthlyRevenue = Array.from({ length: 6 }, (_, i) => {
+      const date = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
+      return {
+        month: months[date.getMonth()],
+        amount: revenueByMonth[monthKey(date)] ?? 0,
+      }
     })
 
-    const lastMonthRevenue = lastMonthOrders.reduce(
-      (sum, order) =>
-        sum + order.items.reduce((s, item) => s + Number(item.price) * item.quantity, 0),
-      0
-    )
+    const grossRevenue = revenueByMonth[monthKey(startOfMonth)] ?? 0
+    const lastMonthRevenue =
+      revenueByMonth[monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1))] ?? 0
 
     const revenueGrowth = lastMonthRevenue > 0
       ? ((grossRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
       : 0
 
-    const products = await prisma.product.findMany({
-      where: { orgId: tenantId },
-    })
-
     const inventoryValuation = products.reduce(
       (sum, p) => sum + Number(p.price) * p.cachedQuantity,
       0
     )
-
-    const totalOrders = await prisma.order.count({
-      where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
-    })
-
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const monthlyRevenue = await Promise.all(
-      Array.from({ length: 6 }, (_, i) => {
-        const date = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
-        const endDate = new Date(now.getFullYear(), now.getMonth() - 4 + i, 0)
-        return { date, endDate, label: months[date.getMonth()] }
-      }).map(async ({ date, endDate, label }) => {
-        const orders = await prisma.order.findMany({
-          where: {
-            orgId: tenantId,
-            createdAt: { gte: date, lte: endDate },
-            status: { in: ['SHIPPED', 'DELIVERED'] },
-          },
-          include: { items: true },
-        })
-        const amount = orders.reduce(
-          (sum, order) =>
-            sum + order.items.reduce((s, item) => s + Number(item.price) * item.quantity, 0),
-          0
-        )
-        return { month: label, amount }
-      })
-    )
-
-    const orderItems = await prisma.orderItem.findMany({
-      where: { order: { orgId: tenantId } },
-      include: { product: { select: { name: true, sku: true } } },
-    })
 
     const productSales: Record<string, { name: string; sku: string; total: number }> = {}
     orderItems.forEach((item) => {
@@ -131,17 +119,9 @@ export const analyticsService = {
         trend: 'up' as const,
       }))
 
-    const movements = await prisma.stockMovement.findMany({
-      where: { orgId: tenantId, createdAt: { gte: startOfMonth } },
-    })
-
     const inUnits = movements.filter(m => m.type === 'IN').reduce((s, m) => s + Math.abs(m.quantity), 0)
     const outUnits = movements.filter(m => m.type === 'OUT').reduce((s, m) => s + Math.abs(m.quantity), 0)
 
-    const lowStock = await prisma.product.findMany({
-      where: { orgId: tenantId, cachedQuantity: { lte: prisma.product.fields.lowStockAt } },
-      select: { name: true, sku: true, cachedQuantity: true },
-    })
     const lowStockProducts = lowStock.map((p) => ({
       name: p.name,
       sku: p.sku,

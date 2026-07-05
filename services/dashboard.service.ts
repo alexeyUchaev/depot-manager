@@ -24,54 +24,65 @@ export const dashboardService = {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const todayOrders = await prisma.order.findMany({
-      where: {
-        orgId: tenantId,
-        createdAt: { gte: today },
-        status: { in: ['SHIPPED', 'DELIVERED'] },
-      },
-      include: { items: true },
-    })
+    const weekStart = new Date(today)
+    weekStart.setDate(weekStart.getDate() - 6)
+
+    // One round of parallel queries per render — the dashboard used to issue
+    // 14 sequential queries, holding a pooler connection for the whole
+    // waterfall and starving other pages under load.
+    const [
+      todayOrders,
+      totalProducts,
+      pendingOrders,
+      recentOrders,
+      recentMovements,
+      lowStockProducts,
+      weekMovements,
+    ] = await Promise.all([
+      prisma.order.findMany({
+        where: {
+          orgId: tenantId,
+          createdAt: { gte: today },
+          status: { in: ['SHIPPED', 'DELIVERED'] },
+        },
+        include: { items: true },
+      }),
+      prisma.product.count({
+        where: { orgId: tenantId },
+      }),
+      prisma.order.count({
+        where: { orgId: tenantId, status: 'PENDING' },
+      }),
+      prisma.order.findMany({
+        where: { orgId: tenantId },
+        orderBy: { createdAt: 'desc' },
+        take: 3,
+        include: { items: true },
+      }),
+      prisma.stockMovement.findMany({
+        where: { orgId: tenantId },
+        orderBy: { createdAt: 'desc' },
+        take: 2,
+        include: { product: { select: { name: true, sku: true } } },
+      }),
+      prisma.product.findMany({
+        where: {
+          orgId: tenantId,
+          cachedQuantity: { lte: prisma.product.fields.lowStockAt },
+        },
+        take: 2,
+      }),
+      prisma.stockMovement.findMany({
+        where: { orgId: tenantId, createdAt: { gte: weekStart } },
+        select: { createdAt: true },
+      }),
+    ])
 
     const todaySales = todayOrders.reduce(
       (sum, order) =>
         sum + order.items.reduce((s, item) => s + Number(item.price) * item.quantity, 0),
       0
     )
-
-    const totalProducts = await prisma.product.count({
-      where: { orgId: tenantId },
-    })
-
-    const pendingOrders = await prisma.order.count({
-      where: { orgId: tenantId, status: 'PENDING' },
-    })
-
-    const todayMovements = await prisma.stockMovement.count({
-      where: { orgId: tenantId, createdAt: { gte: today } },
-    })
-
-    const recentOrders = await prisma.order.findMany({
-      where: { orgId: tenantId },
-      orderBy: { createdAt: 'desc' },
-      take: 3,
-      include: { items: true },
-    })
-
-    const recentMovements = await prisma.stockMovement.findMany({
-      where: { orgId: tenantId },
-      orderBy: { createdAt: 'desc' },
-      take: 2,
-      include: { product: { select: { name: true, sku: true } } },
-    })
-
-    const lowStockProducts = await prisma.product.findMany({
-      where: {
-        orgId: tenantId,
-        cachedQuantity: { lte: prisma.product.fields.lowStockAt },
-      },
-      take: 2,
-    })
 
     const recentActivities = [
       ...recentOrders.map((order) => ({
@@ -102,25 +113,22 @@ export const dashboardService = {
       .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
       .slice(0, 5)
 
-    // Weekly activity
+    // Weekly activity — bucket the last 7 days of movements in memory instead
+    // of issuing one count query per day.
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    const weeklyActivity = await Promise.all(
-      days.map(async (day, index) => {
-        const date = new Date()
-        date.setDate(date.getDate() - (6 - index))
-        date.setHours(0, 0, 0, 0)
-        const nextDate = new Date(date)
-        nextDate.setDate(nextDate.getDate() + 1)
+    const weeklyActivity = days.map((day, index) => {
+      const date = new Date(today)
+      date.setDate(date.getDate() - (6 - index))
+      const nextDate = new Date(date)
+      nextDate.setDate(nextDate.getDate() + 1)
 
-        const count = await prisma.stockMovement.count({
-          where: {
-            orgId: tenantId,
-            createdAt: { gte: date, lt: nextDate },
-          },
-        })
-        return { day, count }
-      })
-    )
+      const count = weekMovements.filter(
+        (m) => m.createdAt >= date && m.createdAt < nextDate
+      ).length
+      return { day, count }
+    })
+
+    const todayMovements = weeklyActivity[weeklyActivity.length - 1].count
 
     return {
       todaySales,
