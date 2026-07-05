@@ -10,6 +10,7 @@ export async function getAnalytics(): Promise<ActionResult<AnalyticsData>> {
     const data = await analyticsService.getAnalytics(DEMO_TENANT_ID)
     return { success: true, data }
   } catch (e: unknown) {
+    console.error('getAnalytics failed:', e)
     const error = e instanceof Error ? e.message : 'Unknown error'
     return { success: false, error }
   }

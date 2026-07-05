@@ -13,6 +13,7 @@ export async function getOrders(): Promise<ActionResult<OrderDTO[]>> {
     const orders = await orderService.getAllByTenant(DEMO_TENANT_ID)
     return { success: true, data: orders }
   } catch (e: unknown) {
+    console.error('getOrders failed:', e)
     const error = e instanceof Error ? e.message : 'Unknown error'
     return { success: false, error }
   }

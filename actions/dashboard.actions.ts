@@ -10,6 +10,7 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
     const stats = await dashboardService.getStats(DEMO_TENANT_ID)
     return { success: true, data: stats }
   } catch (e: unknown) {
+    console.error('getDashboardStats failed:', e)
     const error = e instanceof Error ? e.message : 'Unknown error'
     return { success: false, error }
   }

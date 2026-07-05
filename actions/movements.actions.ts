@@ -12,6 +12,7 @@ export async function getMovements(): Promise<ActionResult<MovementDTO[]>> {
     const movements = await movementService.getAllByTenant(DEMO_TENANT_ID)
     return { success: true, data: movements }
   } catch (e: unknown) {
+    console.error('getMovements failed:', e)
     const error = e instanceof Error ? e.message : 'Unknown error'
     return { success: false, error }
   }

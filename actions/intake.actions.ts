@@ -13,6 +13,7 @@ export async function getIntakes(): Promise<ActionResult<IntakeDTO[]>> {
     const intakes = await intakeService.getAllIntakesByTenant(DEMO_TENANT_ID)
     return { success: true, data: intakes }
   } catch (e: unknown) {
+    console.error('getIntakes failed:', e)
     const error = e instanceof Error ? e.message : 'Unknown error'
     return { success: false, error }
   }

@@ -11,6 +11,7 @@ export async function getProducts(): Promise<ActionResult<ProductDTO[]>> {
     const products = await services.getAllProductsByTenant(DEMO_TENANT_ID)
     return { success: true, data: products }
   } catch (e: unknown) {
+    console.error('getProducts failed:', e)
     const error = e instanceof Error ? e.message : 'Unknown error'
     return { success: false, error }
   }
@@ -21,6 +22,7 @@ export async function getLowStockProducts(): Promise<ActionResult<ProductDTO[]>>
     const products = await services.getLowStock(DEMO_TENANT_ID)
     return { success: true, data: products }
   } catch (e: unknown) {
+    console.error('getLowStockProducts failed:', e)
     const error = e instanceof Error ? e.message : 'Unknown error'
     return { success: false, error }
   }
